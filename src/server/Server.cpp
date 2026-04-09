@@ -34,9 +34,10 @@ Server::Server::~Server()
 
 void Server::Server::runServer()
 {
-    int clientIdx;
     int newClient;
     struct pollfd newFd;
+    char buffer[4096];
+    ssize_t bytesRead;
     struct sockaddr_in clientAddress;
     socklen_t clientLen;
 
@@ -44,7 +45,6 @@ void Server::Server::runServer()
         if (poll(_fds.data(), _fds.size(), NO_TIMEOUT) == -1)
             break;
         for (int i = 0; i < (int)_fds.size(); i++) {
-            clientIdx = i;
             if (!(_fds[i].revents & POLLIN))
                 continue;
             if (_fds[i].fd == _serverFD){
@@ -62,8 +62,17 @@ void Server::Server::runServer()
                 }
             }
             else {
-                clientIdx--;
-                // readCommand;
+                bytesRead = read(_fds[i].fd, buffer, sizeof(buffer) - 1);
+                if (bytesRead <= 0) {
+                    if (bytesRead == 0)
+                        std::cout << "Client déconnecté" << std::endl;
+                    else continue;
+                    close(_fds[i].fd);
+                    _fds.erase(_fds.begin() + i);
+                    i--;
+                    continue;
+                }
+                buffer[bytesRead] = '\0';
             }
         }
     }
