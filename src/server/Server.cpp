@@ -52,9 +52,9 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
     }
     User newUser(username);
     myUuid userUuid = newUser.getUuid();
-    std::unique_ptr<char> uuidPtr;
-    uuid_unparse(userUuid.uuid, uuidPtr.get());
-    server_event_user_created(uuidPtr.get(), newUser.getUsername().c_str());
+    char uuidStr[37];
+    uuid_unparse(userUuid.uuid, uuidStr);
+    server_event_user_created(uuidStr, newUser.getUsername().c_str());
     _users.push_back(newUser);
     std::string msg = "200 user: " + username + " created.\n";
     write(clientFD, msg.c_str(), strlen(msg.c_str()));
@@ -63,11 +63,6 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
 
 void Server::Server::handleCommand(Parser &parser, int clientFD)
 {
-    std::cout << "le nom de la commande: " << parser.getCommand() << std::endl;
-    
-    for (auto arg : parser.getArgs()) {
-        std::cout << arg << std::endl;
-    }
     if (_commandsTab.find(parser.getCommand()) != _commandsTab.end()){
         (this->*(_commandsTab[parser.getCommand()]))(clientFD, parser.getArgs());
     } else {
@@ -102,15 +97,14 @@ void Server::Server::runServer()
                     _fds.push_back(newFd);
                     _nbFds++;
                     _nbClients++;
-                    write(newClient, "Bienvenue dans le myTeams.\n", 28);
-                    std::cout << "Nouvelle connexion !" << std::endl;
+                    write(newClient, "Welcome to myTeams.\n", 21);
                 }
             }
             else {
                 bytesRead = read(_fds[i].fd, buffer, sizeof(buffer) - 1);
                 if (bytesRead <= 0) {
                     if (bytesRead == 0)
-                        std::cout << "Client déconnecté" << std::endl;
+                        std::cout << "User disconected" << std::endl;
                     else continue;
                     close(_fds[i].fd);
                     _fds.erase(_fds.begin() + i);

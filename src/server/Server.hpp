@@ -1,6 +1,5 @@
     #pragma once
     #include <netinet/in.h>
-    #include "../libs/myteams/logging_server.h"
     #include <stdexcept>
     #include <algorithm>
     #include "user/User.hpp"
@@ -13,7 +12,9 @@
     #include <stdlib.h>
     #include <vector>
     #include <map>
-
+    extern "C" {
+        #include "../libs/myteams/logging_server.h"
+    }
     #define NO_TIMEOUT -1
     #define CMD_SIZE 4096
     namespace Server {
