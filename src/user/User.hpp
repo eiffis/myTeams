@@ -6,7 +6,7 @@
 class User {
     public:
         User(std::string username);
-        ~User() = default;
+        ~User();
         std::string getUsername() const;
         std::string getUuid() const;
         bool isLoggedIn() const;

@@ -1,4 +1,9 @@
-#include "Parser.hpp"
+#include "parser/Parser.hpp"
+
+void Parser::parseArgs(std::string args)
+{
+    std::cout << "Les arguments de la commandes: " << args << std::endl;
+}
 
 void Parser::parseCommands(std::string buffer)
 {
@@ -16,5 +21,7 @@ void Parser::parseCommands(std::string buffer)
         _command = buffer.substr(0, separation);
         args = buffer.substr(separation + 1);
         // parser les args pour les mettre dans le vecteur et faire attention aux quotes 
+        std::cout << "Nom de la commande: " << _command << std::endl;
+        parseArgs(args);
     }
 }

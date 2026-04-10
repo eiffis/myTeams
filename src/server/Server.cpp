@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "server/Server.hpp"
 
 Server::Server::Server(int port)
 {
@@ -38,8 +38,10 @@ void Server::Server::runServer()
     struct pollfd newFd;
     char buffer[4096];
     ssize_t bytesRead;
+    Parser parser;
     struct sockaddr_in clientAddress;
     socklen_t clientLen;
+    
 
     while (1) {
         if (poll(_fds.data(), _fds.size(), NO_TIMEOUT) == -1)
@@ -73,6 +75,7 @@ void Server::Server::runServer()
                     continue;
                 }
                 buffer[bytesRead] = '\0';
+                parser.parseCommands(buffer);
             }
         }
     }
