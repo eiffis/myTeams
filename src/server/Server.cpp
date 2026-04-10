@@ -49,8 +49,8 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
         char uuidStr[37];
         uuid_unparse(_users.at(index).getUuid().uuid, uuidStr);
         server_event_user_logged_out(uuidStr);
-        _users.erase(it);
         std::string msg = "200 user: " + _users.at(index).getUsername() + " logged out.\n";
+        _users.erase(it);
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     } else {
