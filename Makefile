@@ -23,9 +23,9 @@ SRC		+=	src/parser/Parser.cpp
 
 OBJ     =   $(SRC:.cpp=.o)
 
-CXXFLAGS  =   -I./src/ -Wall -Wextra
+CXXFLAGS  =   -I./src/ -I./libs/myteams -Wall -Wextra
 
-LDFLAGS = -luuid
+LDFLAGS   = -L./libs/myteams -lmyteams -Wl,-rpath=./libs/myteams -luuid
 
 all:    $(NAME)
 
