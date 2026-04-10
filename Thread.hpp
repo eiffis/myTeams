@@ -2,7 +2,10 @@
 
 #include <uuid/uuid.h>
 #include <vector>
+#include <string>
+#include <fstream>
 #include "Constants.hpp"
+#include "Reply.hpp"
 #include "Thread.hpp"
 
 class Thread
@@ -11,8 +14,13 @@ private:
     char _name[MAX_NAME_LENGTH];
     char _messsage[MAX_DESCRIPTION_LENGTH];
     uuid_t _uuid;
-    std::vector<std::pair<uuid_t, char[MAX_BODY_LENGTH]>> _replies;
+    std::vector<Reply> _replies;
 public:
     Thread(/* args */);
     ~Thread();
+
+    char *getName() { return _name; };
+    uuid_t &getUuid() { return _uuid; };
+    bool store(std::ofstream &out);
+    bool load(std::ifstream &in);
 };
