@@ -38,6 +38,7 @@ void Parser::parseCommands(std::string buffer)
     } else {
         _command = buffer.substr(0, separation);
         args = buffer.substr(separation + 1);
+        _arguments.clear();
         parseArgs(args);
     }
 }
