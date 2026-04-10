@@ -28,12 +28,28 @@ Server::Server::Server(int port)
     _commandsTab["/login"] = &Server::loginCommand;
     _commandsTab["/logout"] = &Server::logoutCommand;
     _commandsTab["/help"] = &Server::helpCommand;
+    _commandsTab["/users"] = &Server::usersCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() > 0){
+        write(clientFD, "400 invalid arguments.\n", 24);
+        return;
+    }
+    std::string userConnected = "Number of users connected : " + std::to_string(_users.size()) + '\n';
+    write(clientFD, userConnected.c_str(), strlen(userConnected.c_str()));
+    for (auto user : _users) {
+        write(clientFD, user.getUsername().c_str(), strlen(user.getUsername().c_str()));
+        write(clientFD, "\n", 1);
+    }
+    return;
 }
 
 void Server::Server::helpCommand(int clientFD, const std::vector<std::string> &arguments)
