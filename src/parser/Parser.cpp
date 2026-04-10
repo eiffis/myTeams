@@ -5,14 +5,14 @@ void Parser::parseArgs(std::string args)
     int start = 0;
     int end = 0;
 
-    for (int i = 0; i < args.size(); i++) {
+    for (int i = 0; (size_t)i < args.size(); i++) {
         if (args[i] == ' ')
             continue;
         if (args[i] == '"'){
             i++;
             start = i;
             end = args.find('"', start);
-            if (end != std::string::npos) {
+            if ((size_t)end != std::string::npos) {
                 _arguments.push_back(args.substr(start, end - start));
                 i = end++;
             } else {
