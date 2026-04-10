@@ -25,6 +25,9 @@ Server::Server::Server(int port)
     serverFd.events = POLLIN;
     serverFd.revents = 0;
     _fds.push_back(serverFd);
+    _commandsTab["/login"] = &Server::loginCommand;
+    _commandsTab["/logout"] = &Server::logoutCommand;
+    //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
@@ -39,7 +42,6 @@ void handleCommand(Parser &parser)
     for (auto arg : parser.getArgs()) {
         std::cout << arg << std::endl;
     }
-
 }
 
 void Server::Server::runServer()

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <vector>
+#include <map>
 
 #define NO_TIMEOUT -1
 #define CMD_SIZE 4096
@@ -28,5 +29,10 @@ namespace Server {
             std::vector<struct pollfd> _fds;
             std::vector<User> _users;
             size_t _nbFds;
+            typedef void (Server::*commandHandler)(int clientFD, const std::vector<std::string> &arguments);
+            std::map<std::string, commandHandler> _commandsTab;
+            // ensuite faire tous les proto des méthodes des commandes /login /logout etc...
+            void loginCommand(int clientFD, const std::vector<std::string> &arguments);
+            void logoutCommand(int clientFD, const std::vector<std::string> &arguments);
     };
 }
