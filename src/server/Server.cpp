@@ -26,7 +26,7 @@ Server::Server::Server(int port)
     serverFd.revents = 0;
     _fds.push_back(serverFd);
     _commandsTab["/login"] = &Server::loginCommand;
-    //_commandsTab["/logout"] = &Server::logoutCommand;
+    _commandsTab["/logout"] = &Server::logoutCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
@@ -35,10 +35,34 @@ Server::Server::~Server()
     close(_serverFD);
 }
 
+void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() > 0){
+        write(clientFD, "400 invalid arguments.\n", 24);
+        return;
+    }
+    auto it = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    size_t index = std::distance(_users.begin(), it);
+    if (it != _users.end()) {
+        char uuidStr[37];
+        uuid_unparse(_users.at(index).getUuid().uuid, uuidStr);
+        server_event_user_logged_out(uuidStr);
+        _users.erase(it);
+        std::string msg = "200 user: " + _users.at(index).getUsername() + " logged out.\n";
+        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+        return;
+    } else {
+        std::string msg = "400 user not found.\n";
+        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+    }
+}
+
 void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1){
-        write(clientFD, "400 Bad request\n", 17);
+        write(clientFD, "400 invalid arguments.\n", 24);
         return;
     }
     std::string username = arguments.front();
@@ -50,7 +74,7 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     }
-    User newUser(username);
+    User newUser(username, clientFD);
     myUuid userUuid = newUser.getUuid();
     char uuidStr[37];
     uuid_unparse(userUuid.uuid, uuidStr);
@@ -108,6 +132,8 @@ void Server::Server::runServer()
                     else continue;
                     close(_fds[i].fd);
                     _fds.erase(_fds.begin() + i);
+                    _nbFds--;
+                    _nbClients--;
                     i--;
                     continue;
                 }
