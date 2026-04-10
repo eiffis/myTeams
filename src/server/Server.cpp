@@ -26,13 +26,35 @@ Server::Server::Server(int port)
     serverFd.revents = 0;
     _fds.push_back(serverFd);
     _commandsTab["/login"] = &Server::loginCommand;
-    _commandsTab["/logout"] = &Server::logoutCommand;
+    //_commandsTab["/logout"] = &Server::logoutCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 1){
+        write(clientFD, "400 Bad request\n", 17);
+        return;
+    }
+    std::string username = arguments.front();
+    auto it = std::find_if(_users.begin(), _users.end(), [&username](const User& u) {
+        return u.getUsername() == username;
+    });
+    if (it != _users.end()){
+        std::string msg = "User: " + username + " already exists.\n";
+        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+        return;
+    }
+    User newUser(username);
+    _users.push_back(newUser);
+    std::string msg = "200 user: " + username + " created.\n";
+    write(clientFD, msg.c_str(), strlen(msg.c_str()));
+    return;
 }
 
 void Server::Server::handleCommand(Parser &parser, int clientFD)
