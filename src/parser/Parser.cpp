@@ -3,6 +3,17 @@
 void Parser::parseArgs(std::string args)
 {
     std::cout << "Les arguments de la commandes: " << args << std::endl;
+    int start = 0;
+    int end = 0;
+    char delimiter = ' ';
+
+    while ((start = args.find_first_not_of(delimiter, end)) != std::string::npos) {
+        end = args.find(delimiter, start);
+        _arguments.push_back(args.substr(start, end - start));
+    }
+    for (auto arg : _arguments) {
+        std::cout << arg << std::endl;
+    }
 }
 
 void Parser::parseCommands(std::string buffer)
