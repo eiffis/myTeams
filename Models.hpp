@@ -1,5 +1,12 @@
+#pragma once
+
 #include "Constants.hpp"
 #include <uuid/uuid.h>
+
+struct myUuid
+{
+    uuid_t uuid;
+};
 
 struct Reply
 {
