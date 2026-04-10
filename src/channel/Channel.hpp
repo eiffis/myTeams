@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Constants.hpp"
-#include "Thread.hpp"
+#include "thread/Thread.hpp"
 
 class Channel
 {

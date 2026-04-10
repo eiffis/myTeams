@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Constants.hpp"
-#include "Channel.hpp"
+#include "channel/Channel.hpp"
 
 class Team
 {
