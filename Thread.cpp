@@ -6,7 +6,7 @@ bool Thread::store(std::ofstream &out)
         return false;
     out.write(_name, MAX_NAME_LENGTH);
     out.write(_messsage, MAX_DESCRIPTION_LENGTH);
-    out.write(reinterpret_cast<const char *>(&_uuid), sizeof(uuid_t));
+    out.write(reinterpret_cast<const char *>(&_uuid), sizeof(myUuid));
     size_t replylen = _replies.size();
     out.write(reinterpret_cast<const char *>(&replylen), sizeof(size_t));
     out.write(reinterpret_cast<const char *>(_replies.data()), replylen * sizeof(Reply));
@@ -21,7 +21,7 @@ bool Thread::load(std::ifstream &in)
         return false;
     in.read(_name, MAX_NAME_LENGTH);
     in.read(_messsage, MAX_DESCRIPTION_LENGTH);
-    in.read(reinterpret_cast<char *>(&_uuid), sizeof(uuid_t));
+    in.read(reinterpret_cast<char *>(&_uuid), sizeof(myUuid));
     size_t replylen = 0;
     in.read(reinterpret_cast<char *>(&replylen), sizeof(size_t));
     if (replylen) {
