@@ -23,12 +23,14 @@ SRC		+=	src/parser/Parser.cpp
 
 OBJ     =   $(SRC:.cpp=.o)
 
-CXXFLAGS  =   -I./src/ -Wall -Wextra -luuid
+CXXFLAGS  =   -I./src/ -Wall -Wextra
+
+LDFLAGS = -luuid
 
 all:    $(NAME)
 
 $(NAME):    $(OBJ)
-	$(CXX) -o $(NAME) $(OBJ) $(CXXFLAGS)
+	$(CXX) -o $(NAME) $(OBJ) $(LDFLAGS)
 
 %.o:    %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
