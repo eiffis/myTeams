@@ -27,12 +27,23 @@ Server::Server::Server(int port)
     _fds.push_back(serverFd);
     _commandsTab["/login"] = &Server::loginCommand;
     _commandsTab["/logout"] = &Server::logoutCommand;
+    _commandsTab["/help"] = &Server::helpCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::helpCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() > 0){
+        write(clientFD, "400 invalid arguments.\n", 24);
+        return;
+    }
+    write(clientFD, "Show Help.\n", 12);
+    return;
 }
 
 void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> &arguments)

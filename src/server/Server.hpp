@@ -37,5 +37,6 @@
                 // ensuite faire tous les proto des méthodes des commandes /login /logout etc...
                 void loginCommand(int clientFD, const std::vector<std::string> &arguments);
                 void logoutCommand(int clientFD, const std::vector<std::string> &arguments);
+                void helpCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }
