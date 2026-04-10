@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include "Constants.hpp"
-#include "Reply.hpp"
+#include "Models.hpp"
 #include "Thread.hpp"
 
 class Thread
@@ -13,14 +13,14 @@ class Thread
 private:
     char _name[MAX_NAME_LENGTH];
     char _messsage[MAX_DESCRIPTION_LENGTH];
-    std::string _uuid;
+    myUuid _uuid;
     std::vector<Reply> _replies;
 public:
     Thread(/* args */);
     ~Thread();
 
     char *getName() { return _name; };
-    std::string &getUuid() { return _uuid; };
+    uuid_t &getUuid() { return _uuid.uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
 };

@@ -8,15 +8,15 @@ class Team
 private:
     char _name[MAX_NAME_LENGTH];
     char _message[MAX_DESCRIPTION_LENGTH];
-    std::string _uuid;
-    std::vector<std::string> _subscribedUsers;
+    myUuid _uuid;
+    std::vector<myUuid> _subscribedUsers;
     std::vector<Channel> _channels;
 public:
     Team(/* args */);
     ~Team();
 
     char *getName() { return _name; };
-    std::string &getUuid() { return _uuid; };
+    uuid_t &getUuid() { return _uuid.uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
 };
