@@ -39,5 +39,6 @@
                 void logoutCommand(int clientFD, const std::vector<std::string> &arguments);
                 void helpCommand(int clientFD, const std::vector<std::string> &arguments);
                 void usersCommand(int clientFD, const std::vector<std::string> &arguments);
+                void userCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }

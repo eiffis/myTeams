@@ -29,12 +29,38 @@ Server::Server::Server(int port)
     _commandsTab["/logout"] = &Server::logoutCommand;
     _commandsTab["/help"] = &Server::helpCommand;
     _commandsTab["/users"] = &Server::usersCommand;
+    _commandsTab["/user"] = &Server::userCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 1) {
+        write(clientFD, "400 invalid arguments.\n", 24);
+        return;
+    }
+    std::string uuid = arguments.front();
+    auto it = std::find_if(_users.begin(), _users.end(), [&uuid](const User& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    if (it != _users.end()) {
+        write(clientFD, "Username: ", 11);
+        std::string username = it->getUsername() + '\n';
+        write(clientFD, username.c_str(), strlen(username.c_str()));
+        write(clientFD, "State: ", 8);
+        std::string logged = (it->isLoggedIn() ? "Connected\n" : "Not connected\n");
+        write(clientFD, logged.c_str(), strlen(logged.c_str()));
+    } else {
+        write(clientFD, "400 User not found.\n", 21);
+        return;
+    }
 }
 
 void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
