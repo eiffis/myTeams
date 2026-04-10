@@ -35,12 +35,17 @@ Server::Server::~Server()
     close(_serverFD);
 }
 
-void handleCommand(Parser &parser)
+void Server::Server::handleCommand(Parser &parser, int clientFD)
 {
     std::cout << "le nom de la commande: " << parser.getCommand() << std::endl;
     
     for (auto arg : parser.getArgs()) {
         std::cout << arg << std::endl;
+    }
+    if (_commandsTab.find(parser.getCommand()) != _commandsTab.end()){
+        (this->*(_commandsTab[parser.getCommand()]))(clientFD, parser.getArgs());
+    } else {
+        write(clientFD, "504 Unrecognized Command.\n", 27);
     }
 }
 
@@ -88,7 +93,7 @@ void Server::Server::runServer()
                 }
                 buffer[bytesRead] = '\0';
                 parser.parseCommands(buffer);
-                handleCommand(parser);
+                handleCommand(parser, _fds[i].fd);
             }
         }
     }

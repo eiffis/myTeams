@@ -20,6 +20,7 @@ namespace Server {
         public:
             Server(int port);
             ~Server();
+            void handleCommand(Parser &parser, int clientFD);
             void runServer();
         private:
             int _serverFD;
