@@ -8,14 +8,14 @@ class Channel
 private:
     char _name[MAX_NAME_LENGTH];
     char _message[MAX_DESCRIPTION_LENGTH];
-    uuid_t _uuid;
+    std::string _uuid;
     std::vector<Thread> _threads;
 public:
     Channel(/* args */);
     ~Channel();
 
     char *getName() { return _name; };
-    uuid_t &getUuid() { return _uuid; };
+    std::string &getUuid() { return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
 };
