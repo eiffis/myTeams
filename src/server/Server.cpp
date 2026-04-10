@@ -51,6 +51,10 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         return;
     }
     User newUser(username);
+    myUuid userUuid = newUser.getUuid();
+    std::unique_ptr<char> uuidPtr;
+    uuid_unparse(userUuid.uuid, uuidPtr.get());
+    server_event_user_created(uuidPtr.get(), newUser.getUsername().c_str());
     _users.push_back(newUser);
     std::string msg = "200 user: " + username + " created.\n";
     write(clientFD, msg.c_str(), strlen(msg.c_str()));
