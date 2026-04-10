@@ -123,7 +123,7 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         return u.getUsername() == username;
     });
     if (it != _users.end()){
-        std::string msg = "User: " + username + " already exists.\n";
+        std::string msg = "400 User: " + username + " already exists.\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     }
