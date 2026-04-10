@@ -32,6 +32,16 @@ Server::Server::~Server()
     close(_serverFD);
 }
 
+void handleCommand(Parser &parser)
+{
+    std::cout << "le nom de la commande: " << parser.getCommand() << std::endl;
+    
+    for (auto arg : parser.getArgs()) {
+        std::cout << arg << std::endl;
+    }
+
+}
+
 void Server::Server::runServer()
 {
     int newClient;
@@ -76,6 +86,7 @@ void Server::Server::runServer()
                 }
                 buffer[bytesRead] = '\0';
                 parser.parseCommands(buffer);
+                handleCommand(parser);
             }
         }
     }

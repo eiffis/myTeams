@@ -2,17 +2,24 @@
 
 void Parser::parseArgs(std::string args)
 {
-    std::cout << "Les arguments de la commandes: " << args << std::endl;
     int start = 0;
     int end = 0;
-    char delimiter = ' ';
 
-    while ((start = args.find_first_not_of(delimiter, end)) != std::string::npos) {
-        end = args.find(delimiter, start);
-        _arguments.push_back(args.substr(start, end - start));
-    }
-    for (auto arg : _arguments) {
-        std::cout << arg << std::endl;
+    for (int i = 0; i < args.size(); i++) {
+        if (args[i] == ' ')
+            continue;
+        if (args[i] == '"'){
+            i++;
+            start = i;
+            end = args.find('"', start);
+            if (end != std::string::npos) {
+                _arguments.push_back(args.substr(start, end - start));
+                i = end++;
+            } else {
+                _arguments.push_back(args.substr(start));
+                break;
+            }
+        }
     }
 }
 
@@ -31,8 +38,16 @@ void Parser::parseCommands(std::string buffer)
     } else {
         _command = buffer.substr(0, separation);
         args = buffer.substr(separation + 1);
-        // parser les args pour les mettre dans le vecteur et faire attention aux quotes 
-        std::cout << "Nom de la commande: " << _command << std::endl;
         parseArgs(args);
     }
+}
+
+std::string Parser::getCommand() const 
+{
+    return _command;
+}
+
+std::vector<std::string> Parser::getArgs() const
+{
+    return _arguments;
 }
