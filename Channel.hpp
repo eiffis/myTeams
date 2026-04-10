@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include "Constants.hpp"
 #include "Thread.hpp"
 
@@ -14,4 +13,9 @@ private:
 public:
     Channel(/* args */);
     ~Channel();
+
+    char *getName() { return _name; };
+    uuid_t &getUuid() { return _uuid; };
+    bool store(std::ofstream &out);
+    bool load(std::ifstream &in);
 };
