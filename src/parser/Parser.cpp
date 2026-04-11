@@ -25,6 +25,8 @@ void Parser::parseArgs(std::string args)
 
 void Parser::parseCommands(std::string buffer)
 {
+    _command.clear();
+    _arguments.clear();
     buffer.erase(buffer.find_last_not_of("\n") + 1);
     size_t separation;
     std::string args;
