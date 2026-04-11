@@ -1,5 +1,6 @@
     #pragma once
     #include <netinet/in.h>
+    #include <arpa/inet.h>
     #include <stdexcept>
     #include <algorithm>
     #include "user/User.hpp"
