@@ -12,6 +12,14 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     std::string command = parser.getCommand();
     std::vector<std::string> arguments = parser.getArgs();
 
+    if (command == "EVENT_USER_CREATED" && arguments.size() == 2){
+        client_event_logged_in(arguments[0].c_str(), arguments[1].c_str());
+    }
+    else if (command == "EVENT_LOGGED_IN" && arguments.size() == 2){
+        client_event_logged_in(arguments[0].c_str(), arguments[1].c_str());
+    }
+    else
+        std::cout << fullMessage << std::endl;
 }
 
 void Client::Client::runClient()
