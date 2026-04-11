@@ -1,5 +1,5 @@
 #pragma once
-#include "Server.hpp"
+#include "server/Server.hpp"
 
 
 namespace Client {

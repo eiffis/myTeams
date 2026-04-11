@@ -1,4 +1,4 @@
-#include "client/client.hpp"
+#include "client/Client.hpp"
 
 Client::Client::Client(std::string adress, std::string port)
 {
@@ -10,7 +10,10 @@ void Client::Client::runClient()
 {
     int clientFD = socket(AF_INET, SOCK_STREAM, 0);
     struct pollfd stdinFD;
+    char buffer[4096];
+    ssize_t bytesRead;
     struct pollfd serverFD;
+    Parser parser;
 
     if (clientFD < 0)
         throw std::runtime_error("Failed to create client socket");
@@ -30,4 +33,32 @@ void Client::Client::runClient()
     serverFD.events = POLLIN;
     serverFD.revents = 0;
     _fds.push_back(serverFD);
+    std::string serverBuffer = "";
+
+    while (1) {
+        if (poll(_fds.data(), _fds.size(), NO_TIMEOUT) == -1)
+            break;
+        if (_fds[0].revents & POLLIN) {
+            std::string input;
+            if (!getline(std::cin, input))
+                break;
+            parser.parseCommands(input);
+        }
+        if (_fds[1].revents & POLLIN) {
+            bytesRead = read(clientFD, buffer, sizeof(buffer) - 1);
+            if (bytesRead <= 0){
+                std::cout << "Connexion lost." << std::endl;
+                break;
+            }
+            buffer[bytesRead] = '\0';
+            serverBuffer += buffer;
+            size_t pos;
+            while ((pos = serverBuffer.find('\n')) != std::string::npos) {
+                std::string fullMessage = serverBuffer.substr(0, pos + 1);
+                serverBuffer.erase(0, pos + 1);
+                std::cout << fullMessage << std::endl;
+            }
+        }
+    }
+    close(clientFD);
 }
