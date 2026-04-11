@@ -4,8 +4,10 @@
     #include <algorithm>
     #include "user/User.hpp"
     #include "parser/Parser.hpp"
+    #include "Constants.hpp"
     #include <string>
     #include <cstring>
+    #include "team/Team.hpp"
     #include <iostream>
     #include <poll.h>
     #include <unistd.h>
@@ -31,6 +33,7 @@
                 struct sockaddr_in _serverAddress;
                 std::vector<struct pollfd> _fds;
                 std::vector<User> _users;
+                //::vector<Team> _teams; à ajouter plus tard quand la classe Team sera finalisée 
                 size_t _nbFds;
                 typedef void (Server::*commandHandler)(int clientFD, const std::vector<std::string> &arguments);
                 std::map<std::string, commandHandler> _commandsTab;
@@ -40,5 +43,6 @@
                 void helpCommand(int clientFD, const std::vector<std::string> &arguments);
                 void usersCommand(int clientFD, const std::vector<std::string> &arguments);
                 void userCommand(int clientFD, const std::vector<std::string> &arguments);
+                void sendCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }

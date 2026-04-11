@@ -30,12 +30,49 @@ Server::Server::Server(int port)
     _commandsTab["/help"] = &Server::helpCommand;
     _commandsTab["/users"] = &Server::usersCommand;
     _commandsTab["/user"] = &Server::userCommand;
+    _commandsTab["/send"] = &Server::sendCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 2){
+        write(clientFD, "400 invalid arguments.\n", 24);
+        return;
+    }
+    if (arguments[1].length() > MAX_BODY_LENGTH){
+        write(clientFD, "400 Message body too long.\n", 28);
+        return;
+    }
+    std::string uuid = arguments.front();
+    auto itReceiver = std::find_if(_users.begin(), _users.end(), [&uuid](const User& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    auto itSender = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itReceiver != _users.end() && itSender != _users.end()) {
+        int receiverFD = itReceiver->getFd();
+        char receiverUiid[37];
+        char senderUuid[37];
+        uuid_unparse(itSender->getUuid().uuid, senderUuid);
+        uuid_unparse(itReceiver->getUuid().uuid, receiverUiid);
+        write(receiverFD, arguments[1].c_str(), strlen(arguments[1].c_str()));
+        write(receiverFD, "\n", 1);
+        server_event_private_message_sended(senderUuid, receiverUiid, arguments[1].c_str());
+        std::string message = "200 message sent to: " + itReceiver->getUsername() + '\n';
+        write(clientFD, message.c_str(), strlen(message.c_str()));
+    } else {
+        write(clientFD, "400 User not found.\n", 21);
+        return;
+    }
 }
 
 void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
