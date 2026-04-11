@@ -6,6 +6,12 @@ int main(int ac, char **argv)
         throw std::runtime_error("Error on arguments.");
     std::string ip(argv[1]);
     std::string port(argv[2]);
-    Client::Client client(ip, port);
-    client.runClient();
+    try {
+        Client::Client client(ip, port);
+        client.runClient();
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return 84;
+    }
+    return 0;
 }
