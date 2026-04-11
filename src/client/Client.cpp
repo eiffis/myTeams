@@ -25,6 +25,13 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
         int userStatus = std::stoi(arguments[2].c_str());
         client_print_users(arguments[0].c_str(), arguments[1].c_str(), userStatus);
     }
+    else if (command == "EVENT_USER" && arguments.size() == 3){
+        int userStatus = std::stoi(arguments[2].c_str());
+        client_print_users(arguments[0].c_str(), arguments[1].c_str(), userStatus);
+    }
+    else if (command == "EVENT_USERS_DON'T_EXISTS" && arguments.size() == 1){
+        client_error_unknown_user(arguments[0].c_str());   
+    }
     else
         std::cout << fullMessage << std::endl;
 }

@@ -88,14 +88,13 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
         return std::string(uuidStr) == uuid;
     });
     if (it != _users.end()) {
-        write(clientFD, "Username: ", 11);
-        std::string username = it->getUsername() + '\n';
-        write(clientFD, username.c_str(), strlen(username.c_str()));
-        write(clientFD, "State: ", 8);
-        std::string logged = (it->isLoggedIn() ? "Connected\n" : "Not connected\n");
-        write(clientFD, logged.c_str(), strlen(logged.c_str()));
+        std::string status = it->isLoggedIn() ? "1" : "0";
+        char uuidStr[37];
+        uuid_unparse(it->getUuid().uuid, uuidStr);
+        std::string msg = "EVENT_USER \"" + std::string(uuidStr) + "\" \"" + it->getUsername() + "\" \"" + status + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
     } else {
-        write(clientFD, "400 User not found.\n", 21);
+        std::string msg = "EVENT_USERS_DON'T_EXISTS \"" + uuid + "\"\n";
         return;
     }
 }
