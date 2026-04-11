@@ -106,11 +106,12 @@ void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &
         write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
-    std::string userConnected = "Number of users connected : " + std::to_string(_users.size()) + '\n';
-    write(clientFD, userConnected.c_str(), strlen(userConnected.c_str()));
-    for (auto user : _users) {
-        write(clientFD, user.getUsername().c_str(), strlen(user.getUsername().c_str()));
-        write(clientFD, "\n", 1);
+    for (const auto& u : _users) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        std::string status = u.isLoggedIn() ? "1" : "0";
+        std::string msg = "EVENT_USERS \"" + std::string(uuidStr) + "\" \"" + u.getUsername() + "\" \"" + status + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
     }
     return;
 }

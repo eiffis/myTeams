@@ -21,6 +21,10 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_LOGGED_OUT" && arguments.size() == 2){
         client_event_logged_out(arguments[0].c_str(), arguments[1].c_str());
     }
+    else if (command == "EVENT_USERS" && arguments.size() == 3){
+        int userStatus = std::stoi(arguments[2].c_str());
+        client_print_users(arguments[0].c_str(), arguments[1].c_str(), userStatus);
+    }
     else
         std::cout << fullMessage << std::endl;
 }
