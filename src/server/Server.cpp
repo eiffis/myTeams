@@ -226,6 +226,16 @@ void Server::Server::runServer()
                     if (bytesRead == 0)
                         std::cout << "User disconected" << std::endl;
                     else continue;
+                    int fd = _fds[i].fd;
+                    auto it = std::find_if(_users.begin(), _users.end(), [&fd](const User& u) {
+                        return u.getFd() == fd;
+                    });
+                    if (it != _users.end()){
+                        char uuidItStr[37];
+                        uuid_unparse(it->getUuid().uuid, uuidItStr);
+                        server_event_user_logged_out(uuidItStr);
+                        _users.erase(it);
+                    }
                     close(_fds[i].fd);
                     _fds.erase(_fds.begin() + i);
                     _nbFds--;
