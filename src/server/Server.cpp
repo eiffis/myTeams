@@ -217,6 +217,7 @@ void Server::Server::runServer()
                     _fds.push_back(newFd);
                     _nbFds++;
                     _nbClients++;
+                    _clientBuffers[newClient] = "";
                     write(newClient, "Welcome to myTeams.\n", 21);
                 }
             }
@@ -237,6 +238,7 @@ void Server::Server::runServer()
                         it->setFD(-1);
                         it->setLogState(false);
                     }
+                    _clientBuffers.erase(fd);
                     close(_fds[i].fd);
                     _fds.erase(_fds.begin() + i);
                     _nbFds--;
@@ -245,8 +247,14 @@ void Server::Server::runServer()
                     continue;
                 }
                 buffer[bytesRead] = '\0';
-                parser.parseCommands(buffer);
-                handleCommand(parser, _fds[i].fd);
+                _clientBuffers[_fds[i].fd] += buffer;
+                size_t pos;
+                while ((pos = _clientBuffers[_fds[i].fd].find('\n')) != std::string::npos) {
+                    std::string fullCommand = _clientBuffers[_fds[i].fd].substr(0, pos + 1);
+                    _clientBuffers[_fds[i].fd].erase(0, pos + 1);
+                    parser.parseCommands(fullCommand);
+                    handleCommand(parser, _fds[i].fd);
+                }
             }
         }
     }

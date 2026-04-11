@@ -33,6 +33,7 @@
                 struct sockaddr_in _serverAddress;
                 std::vector<struct pollfd> _fds;
                 std::vector<User> _users;
+                std::map<int, std::string> _clientBuffers;
                 //::vector<Team> _teams; à ajouter plus tard quand la classe Team sera finalisée 
                 size_t _nbFds;
                 typedef void (Server::*commandHandler)(int clientFD, const std::vector<std::string> &arguments);
