@@ -46,7 +46,7 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
         return;
     }
     if (arguments[1].length() > MAX_BODY_LENGTH){
-        write(clientFD, "400 Message body too long.\n", 28);
+        write(clientFD, "BODY MESSAGE TOO LONG\n", 23);
         return;
     }
     std::string uuid = arguments.front();
@@ -59,18 +59,16 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
         return u.getFd() == clientFD;
     });
     if (itReceiver != _users.end() && itSender != _users.end()) {
-        int receiverFD = itReceiver->getFd();
         char receiverUiid[37];
         char senderUuid[37];
         uuid_unparse(itSender->getUuid().uuid, senderUuid);
         uuid_unparse(itReceiver->getUuid().uuid, receiverUiid);
-        write(receiverFD, arguments[1].c_str(), strlen(arguments[1].c_str()));
-        write(receiverFD, "\n", 1);
         server_event_private_message_sended(senderUuid, receiverUiid, arguments[1].c_str());
-        std::string message = "200 message sent to: " + itReceiver->getUsername() + '\n';
-        write(clientFD, message.c_str(), strlen(message.c_str()));
+        std::string msg = "EVENT_MESSAGE_SENT \"" + std::string(senderUuid) + "\" \"" + arguments[1] + "\"\n";
+        write(clientFD, msg.c_str(), strlen(msg.c_str()));
     } else {
-        write(clientFD, "400 User not found.\n", 21);
+        std::string msg = "EVENT_USER_DON'T_EXISTS \"" + uuid + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
         return;
     }
 }

@@ -32,6 +32,9 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_USER_DON'T_EXISTS" && arguments.size() == 1){
         client_error_unknown_user(arguments[0].c_str());   
     }
+    else if (command == "EVENT_MESSAGE_SENT" && arguments.size() == 2){
+        client_event_private_message_received(arguments[0].c_str(), arguments[1].c_str());
+    }
     else
         std::cout << fullMessage << std::endl;
 }
