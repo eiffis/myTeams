@@ -253,7 +253,8 @@ void Server::Server::runServer()
                     std::string fullCommand = _clientBuffers[_fds[i].fd].substr(0, pos + 1);
                     _clientBuffers[_fds[i].fd].erase(0, pos + 1);
                     parser.parseCommands(fullCommand);
-                    handleCommand(parser, _fds[i].fd);
+                    if (!parser.getCommand().empty())
+                        handleCommand(parser, _fds[i].fd);
                 }
             }
         }
