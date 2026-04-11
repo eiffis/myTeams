@@ -234,7 +234,8 @@ void Server::Server::runServer()
                         char uuidItStr[37];
                         uuid_unparse(it->getUuid().uuid, uuidItStr);
                         server_event_user_logged_out(uuidItStr);
-                        _users.erase(it);
+                        it->setFD(-1);
+                        it->setLogState(false);
                     }
                     close(_fds[i].fd);
                     _fds.erase(_fds.begin() + i);
