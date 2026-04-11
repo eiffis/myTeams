@@ -42,7 +42,7 @@ Server::Server::~Server()
 void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 2){
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
     if (arguments[1].length() > MAX_BODY_LENGTH){
@@ -78,7 +78,7 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
 void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1) {
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
     std::string uuid = arguments.front();
@@ -103,7 +103,7 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
 void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() > 0){
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
     std::string userConnected = "Number of users connected : " + std::to_string(_users.size()) + '\n';
@@ -118,7 +118,7 @@ void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &
 void Server::Server::helpCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() > 0){
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
     write(clientFD, "Show Help.\n", 12);
@@ -128,7 +128,7 @@ void Server::Server::helpCommand(int clientFD, const std::vector<std::string> &a
 void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() > 0){
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 24);
         return;
     }
     auto it = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
@@ -141,11 +141,11 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
         server_event_user_logged_out(uuidStr);
         it->setLogState(false);
         it->setFD(-1);
-        std::string msg = "200 user: " + _users.at(index).getUsername() + " logged out.\n";
+        std::string msg = "EVENT_LOGGED_OUT \"" + std::string(uuidStr) + "\" \"" + it->getUsername() + "\"\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     } else {
-        std::string msg = "400 user not found.\n";
+        std::string msg = "USER NOT FOUND\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
     }
 }
@@ -153,7 +153,7 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
 void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1){
-        write(clientFD, "400 invalid arguments.\n", 24);
+        write(clientFD, "INVALID_ARGS.\n", 15);
         return;
     }
     std::string username = arguments.front();
@@ -186,7 +186,7 @@ void Server::Server::handleCommand(Parser &parser, int clientFD)
     if (_commandsTab.find(parser.getCommand()) != _commandsTab.end()){
         (this->*(_commandsTab[parser.getCommand()]))(clientFD, parser.getArgs());
     } else {
-        write(clientFD, "504 Unrecognized Command.\n", 27);
+        write(clientFD, "UNRECOGNIZED COMMAND\n", 22);
     }
 }
 
@@ -224,7 +224,7 @@ void Server::Server::runServer()
                 bytesRead = read(_fds[i].fd, buffer, sizeof(buffer) - 1);
                 if (bytesRead <= 0) {
                     if (bytesRead == 0)
-                        std::cout << "User disconected" << std::endl;
+                        std::cout << "USER DISCONNECTED" << std::endl;
                     else continue;
                     int fd = _fds[i].fd;
                     auto it = std::find_if(_users.begin(), _users.end(), [&fd](const User& u) {
