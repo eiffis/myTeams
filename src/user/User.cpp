@@ -4,6 +4,7 @@ User::User(std::string username, int fd)
 {
     _username = username;
     _fd = fd;
+    _loggedIn = true;
     uuid_generate(_uuid.uuid);    
 }
 
@@ -30,4 +31,14 @@ myUuid User::getUuid() const
 bool User::isLoggedIn() const
 {
     return _loggedIn;
+}
+
+void User::setFD(int FD)
+{
+    _fd = FD;
+}
+
+void User::setLogState(bool state)
+{
+    _loggedIn = state;
 }

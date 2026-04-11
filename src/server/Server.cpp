@@ -160,7 +160,12 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         return u.getUsername() == username;
     });
     if (it != _users.end()){
-        std::string msg = "400 User: " + username + " already exists.\n";
+        it->setFD(clientFD);
+        it->setLogState(true);
+        char uuidItStr[37];
+        uuid_unparse(it->getUuid().uuid, uuidItStr);
+        server_event_user_logged_in(uuidItStr);
+        std::string msg = "200 user: " + username + " logged in.\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     }

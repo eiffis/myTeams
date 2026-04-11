@@ -11,8 +11,10 @@ class User {
         std::string getUsername() const;
         int getFd() const;
         myUuid getUuid() const;
+        void setFD(int FD);
         bool isLoggedIn() const;
-
+        void setLogState(bool state);
+        
     private:
         myUuid _uuid;
         int _fd;
