@@ -5,41 +5,46 @@
 ## makefile
 ##
 
-NAME    =   myteams_server
+SERVER    =   myteams_server
+CLIENT    =   myteams_client
 
 CXX     =   clang++
 
-## Main
-SRC     =   src/main.cpp
+## SERVER_SRC
+SERVER_SRC		=   src/main.cpp
+SERVER_SRC      +=  src/server/Server.cpp
+SERVER_SRC      +=  src/user/User.cpp
 
-## User
-SRC		+=	src/user/User.cpp
-
-## Server
-SRC		+=	src/server/Server.cpp
+## CLIENT_SRC 
+CLIENT_SRC  =  src/client/clientMain.cpp
+CLIENT_SRC  += src/client/Client.cpp
 
 ## Parser
-SRC		+=	src/parser/Parser.cpp
+COMMON_SRC  = src/parser/Parser.cpp
 
-OBJ     =   $(SRC:.cpp=.o)
+SERVER_OBJ  = $(SERVER_SRC:.cpp=.o) $(COMMON_SRC:.cpp=.o)
+CLIENT_OBJ  = $(CLIENT_SRC:.cpp=.o) $(COMMON_SRC:.cpp=.o)
 
 CXXFLAGS  =   -I./src/ -I./libs/myteams -Wall -Wextra
 
 LDFLAGS   = -L./libs/myteams -lmyteams -Wl,-rpath=./libs/myteams -luuid
 
-all:    $(NAME)
+all:    $(SERVER) $(CLIENT)
 
-$(NAME):    $(OBJ)
-	$(CXX) -o $(NAME) $(OBJ) $(LDFLAGS)
+$(SERVER): $(SERVER_OBJ)
+	$(CXX) -o $(SERVER) $(SERVER_OBJ) $(LDFLAGS)
+
+$(CLIENT): $(CLIENT_OBJ)
+	$(CXX) -o $(CLIENT) $(CLIENT_OBJ) $(LDFLAGS)
 
 %.o:    %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(SERVER_OBJ) $(CLIENT_OBJ)
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(SERVER) $(CLIENT)
 
 re:     fclean all
 
