@@ -166,7 +166,7 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         char uuidItStr[37];
         uuid_unparse(it->getUuid().uuid, uuidItStr);
         server_event_user_logged_in(uuidItStr);
-        std::string msg = "200 user: " + username + " logged in.\n";
+        std::string msg = "EVENT_LOGGED_IN \"" + std::string(uuidItStr) + "\" \"" + username + "\"\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
         return;
     }
@@ -176,7 +176,7 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
     uuid_unparse(userUuid.uuid, uuidStr);
     server_event_user_created(uuidStr, newUser.getUsername().c_str());
     _users.push_back(newUser);
-    std::string msg = "200 user: " + username + " created.\n";
+    std::string msg = "EVENT_USER_CREATED \"" + std::string(uuidStr) + "\" \"" + username + "\"\n";
     write(clientFD, msg.c_str(), strlen(msg.c_str()));
     return;
 }
