@@ -6,7 +6,7 @@
 ##
 
 SERVER    =   myteams_server
-CLIENT    =   myteams_client
+CLIENT    =   myteams_cli
 
 CXX     =   clang++
 

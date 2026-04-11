@@ -2,8 +2,11 @@
 
 int main(int ac, char **argv)
 {
-    if (ac != 3)
-        throw std::runtime_error("Error on arguments.");
+    if (ac != 3){
+        std::string msg = "USAGE: ./myteams_cli ip port\n\nip is the server ip address on which the server socket listens\nport is the port number on which the server socket listens\n";
+        std::cout << msg;
+        return 84;
+    }
     std::string ip(argv[1]);
     std::string port(argv[2]);
     try {

@@ -2,8 +2,11 @@
 
 int main(int ac, char **argv)
 {
-    if (ac != 2)
-        throw std::runtime_error("Error on arguments");
+    if (ac != 2){
+        std::string msg = "USAGE: ./myteams_server port\n\nport is the port number on which the server socket listens.\n";
+        std::cout << msg;
+        return 84;
+    }
     
     try {
         Server::Server serv(std::stoi(argv[1]));
