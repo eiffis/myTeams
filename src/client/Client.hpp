@@ -1,6 +1,8 @@
 #pragma once
 #include "server/Server.hpp"
-
+extern "C" {
+    #include "logging_client.h"
+}
 
 namespace Client {
     class Client {

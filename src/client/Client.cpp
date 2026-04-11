@@ -6,6 +6,15 @@ Client::Client::Client(std::string adress, std::string port)
     _port = port;
 }
 
+void handleEvent(std::string fullMessage, Parser &parser)
+{
+    parser.parseCommands(fullMessage);
+    std::string command = parser.getCommand();
+    std::vector<std::string> arguments = parser.getArgs();
+
+    std::cout << "La commande : " << command;
+}
+
 void Client::Client::runClient()
 {
     int clientFD = socket(AF_INET, SOCK_STREAM, 0);
@@ -58,7 +67,7 @@ void Client::Client::runClient()
             while ((pos = serverBuffer.find('\n')) != std::string::npos) {
                 std::string fullMessage = serverBuffer.substr(0, pos + 1);
                 serverBuffer.erase(0, pos + 1);
-                std::cout << fullMessage << std::endl;
+                handleEvent(fullMessage, parser);
             }
         }
     }
