@@ -14,9 +14,10 @@ void Parser::parseArgs(std::string args)
             end = args.find('"', start);
             if ((size_t)end != std::string::npos) {
                 _arguments.push_back(args.substr(start, end - start));
-                i = end++;
+                i = end;
             } else {
-                _arguments.push_back(args.substr(start));
+                _command = "INVALID";
+                _arguments.clear();
                 break;
             }
         }
