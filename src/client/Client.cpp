@@ -6,13 +6,12 @@ Client::Client::Client(std::string adress, std::string port)
     _port = port;
 }
 
-void handleEvent(std::string fullMessage, Parser &parser)
+void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
 {
     parser.parseCommands(fullMessage);
     std::string command = parser.getCommand();
     std::vector<std::string> arguments = parser.getArgs();
 
-    std::cout << "La commande : " << command;
 }
 
 void Client::Client::runClient()

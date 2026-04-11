@@ -218,7 +218,6 @@ void Server::Server::runServer()
                     _nbFds++;
                     _nbClients++;
                     _clientBuffers[newClient] = "";
-                    write(newClient, "Welcome to myTeams.\n", 21);
                 }
             }
             else {
