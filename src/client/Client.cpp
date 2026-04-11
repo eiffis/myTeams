@@ -43,6 +43,8 @@ void Client::Client::runClient()
             if (!getline(std::cin, input))
                 break;
             parser.parseCommands(input);
+            std::string toSend = input + '\n';
+            write(clientFD, toSend.c_str(), strlen(toSend.c_str()));
         }
         if (_fds[1].revents & POLLIN) {
             bytesRead = read(clientFD, buffer, sizeof(buffer) - 1);
