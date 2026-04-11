@@ -94,7 +94,7 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
         std::string msg = "EVENT_USER \"" + std::string(uuidStr) + "\" \"" + it->getUsername() + "\" \"" + status + "\"\n";
         write(clientFD, msg.c_str(), msg.length());
     } else {
-        std::string msg = "EVENT_USERS_DON'T_EXISTS \"" + uuid + "\"\n";
+        std::string msg = "EVENT_USER_DON'T_EXISTS \"" + uuid + "\"\n";
         return;
     }
 }
