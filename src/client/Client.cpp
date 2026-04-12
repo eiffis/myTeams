@@ -38,6 +38,15 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_MESSAGE_LIST" && arguments.size() == 3){
         client_private_message_print_messages(arguments[0].c_str(), static_cast<time_t>(std::stoll(arguments[1])), arguments[2].c_str());
     }
+    else if (command == "EVENT_UNKNOWN_TEAM" && arguments.size() == 1){
+        client_error_unknown_team(arguments[0].c_str());
+    }
+    else if (command == "EVENT_UNKNOWN_CHANNEL" && arguments.size() == 1){
+        client_error_unknown_channel(arguments[0].c_str());
+    }
+    else if (command == "EVENT_UNKNOWN_THREAD" && arguments.size() == 1){
+        client_error_unknown_thread(arguments[0].c_str());
+    }
     else
         std::cout << fullMessage << std::endl;
 }
