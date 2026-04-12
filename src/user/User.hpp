@@ -14,6 +14,9 @@ class User {
         myUuid getUuid() const;
         void setFD(int FD);
         void setContext(Context context);
+        void setTeamUuid(std::string teamUuid);
+        void setChannelUuid(std::string channelUuid);
+        void setThreadUuid(std::string threadUuid);
         bool isLoggedIn() const;
         void setLogState(bool state);
         
@@ -23,4 +26,7 @@ class User {
         std::string _username;
         bool _loggedIn;
         Context _currentContext;
+        std::string _teamUuid;
+        std::string _channelUuid;
+        std::string _threadUuid;
 };

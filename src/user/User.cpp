@@ -48,3 +48,18 @@ void User::setContext(Context context)
 {
     _currentContext = context;
 }
+
+void User::setTeamUuid(std::string teamUuid)
+{
+    _teamUuid = teamUuid;
+}
+
+void User::setChannelUuid(std::string channelUuid)
+{
+    _channelUuid = channelUuid;
+}
+
+void User::setThreadUuid(std::string threadUuid)
+{
+    _threadUuid = threadUuid;
+}
