@@ -59,5 +59,6 @@
                 void sendCommand(int clientFD, const std::vector<std::string> &arguments);
                 void messagesCommand(int clientFD, const std::vector<std::string> &arguments);
                 void useCommand(int clientFD, const std::vector<std::string> &arguments);
+                void createCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }

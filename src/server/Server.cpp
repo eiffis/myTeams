@@ -33,12 +33,40 @@ Server::Server::Server(int port)
     _commandsTab["/send"] = &Server::sendCommand;
     _commandsTab["/messages"] = &Server::messagesCommand;
     _commandsTab["/use"] = &Server::useCommand;
+    _commandsTab["/create"] = &Server::createCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::createCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    if (itUser->getContext() == NONE) {
+        if (arguments.size() != 2){
+            write(clientFD, "INVALID_ARGS.\n", 14);
+            return;
+        }
+        Team newTeam(arguments[0], arguments[1]);
+        char teamUuidStr[37];
+        char userUuidStr[37];
+        uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+        uuid_unparse(newTeam.getUuid().uuid, teamUuidStr);
+        server_event_team_created(teamUuidStr, arguments[0].c_str(), userUuidStr);
+        _teams.push_back(newTeam);
+        std::string msg = "EVENT_TEAM_CREATED \"" + std::string(teamUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
+        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+        return;
+    }
 }
 
 void Server::Server::useCommand(int clientFD, const std::vector<std::string> &arguments)
