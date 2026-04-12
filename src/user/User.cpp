@@ -5,7 +5,7 @@ User::User(std::string username, int fd)
     _username = username;
     _fd = fd;
     _loggedIn = true;
-    _currentContext = "";
+    _currentContext = NONE;
     uuid_generate(_uuid.uuid);    
 }
 
@@ -42,4 +42,9 @@ void User::setFD(int FD)
 void User::setLogState(bool state)
 {
     _loggedIn = state;
+}
+
+void User::setContext(Context context)
+{
+    _currentContext = context;
 }

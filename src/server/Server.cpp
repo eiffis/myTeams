@@ -32,12 +32,52 @@ Server::Server::Server(int port)
     _commandsTab["/user"] = &Server::userCommand;
     _commandsTab["/send"] = &Server::sendCommand;
     _commandsTab["/messages"] = &Server::messagesCommand;
+    _commandsTab["/use"] = &Server::useCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::useCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 1){
+        write(clientFD, "INVALID_ARGS.\n", 15);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    std::string uuid = arguments.front();
+    auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&uuid](const Team& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    if (itTeam != _teams.end()){
+        itUser->setContext(TEAM);
+        return;
+    }
+    auto itThread = std::find_if(_threads.begin(), _threads.end(), [&uuid](const Thread& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    if (itThread != _threads.end()){
+        itUser->setContext(THREAD);
+        return;
+    }
+    auto itChannel = std::find_if(_channels.begin(), _channels.end(), [&uuid](const Channel& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    if (itChannel != _channels.end()){
+        itUser->setContext(CHANNEL);
+        return;
+    }
 }
 
 void Server::Server::messagesCommand(int clientFD, const std::vector<std::string> &arguments)

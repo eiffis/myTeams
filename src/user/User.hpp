@@ -2,6 +2,7 @@
 #include <string>
 #include <uuid/uuid.h>
 #include "Models.hpp"
+#include "Constants.hpp"
 #include <memory>
 
 class User {
@@ -12,6 +13,7 @@ class User {
         int getFd() const;
         myUuid getUuid() const;
         void setFD(int FD);
+        void setContext(Context context);
         bool isLoggedIn() const;
         void setLogState(bool state);
         
@@ -20,5 +22,5 @@ class User {
         int _fd;
         std::string _username;
         bool _loggedIn;
-        std::string _currentContext;
+        Context _currentContext;
 };

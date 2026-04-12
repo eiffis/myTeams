@@ -22,7 +22,6 @@
     #define NO_TIMEOUT -1
     #define CMD_SIZE 4096
     namespace Server {
-
         typedef struct messages_s {
             std::string senderUuid;
             std::string receiverUuid;
@@ -59,5 +58,6 @@
                 void userCommand(int clientFD, const std::vector<std::string> &arguments);
                 void sendCommand(int clientFD, const std::vector<std::string> &arguments);
                 void messagesCommand(int clientFD, const std::vector<std::string> &arguments);
+                void useCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }
