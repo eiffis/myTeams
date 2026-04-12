@@ -21,7 +21,7 @@ public:
     Thread(std::string threadName, std::string threadDesc);
     ~Thread() = default;
 
-    const char *getName() { return _name; };
+    const char *getName() const { return _name; };
     myUuid getUuid() const { return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);

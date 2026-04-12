@@ -44,12 +44,16 @@ Server::Server::~Server()
 void Server::Server::useCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
     });
+    if (itUser == _users.end()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
     std::string uuid = arguments.front();
     auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&uuid](const Team& u) {
         char uuidStr[37];
@@ -83,7 +87,7 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
 void Server::Server::messagesCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     std::string uuid = arguments.front();
@@ -115,7 +119,7 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
 void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 2){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     if (arguments[1].length() > MAX_BODY_LENGTH){
@@ -155,7 +159,7 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
 void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1) {
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     std::string uuid = arguments.front();
@@ -180,7 +184,7 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
 void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() > 0){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     for (const auto& u : _users) {
@@ -196,7 +200,7 @@ void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &
 void Server::Server::helpCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() > 0){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     write(clientFD, "Show Help.\n", 12);
@@ -231,7 +235,7 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
 void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 1){
-        write(clientFD, "INVALID_ARGS.\n", 15);
+        write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
     std::string username = arguments.front();
