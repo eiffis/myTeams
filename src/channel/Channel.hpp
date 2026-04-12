@@ -11,6 +11,8 @@ private:
     char _message[MAX_DESCRIPTION_LENGTH];
     myUuid _uuid;
     std::vector<Thread> _threads;
+    std::string _parentTeamUuid;
+
 public:
     Channel() = default;
     Channel(std::string channelName, std::string channelDesc);
