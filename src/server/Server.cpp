@@ -61,15 +61,13 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
         char receiverUuidStr[37];
         uuid_unparse(itReceiver->getUuid().uuid, receiverUuidStr);
         for (auto message : _messages) {
-            if (message.senderFD == clientFD){
-                std::string msg = "EVENT_MESSAGE_LIST \"" + std::string(senderUuidStr) + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
+            bool me = (message.senderFD == clientFD && message.receiverFD == itReceiver->getFd());
+            bool him = (message.senderFD == itReceiver->getFd() && message.receiverFD == clientFD);
+            if (me || him) {
+                std::string actualSenderUuid = me ? senderUuidStr : receiverUuidStr;
+                std::string msg = "EVENT_MESSAGE_LIST \"" + actualSenderUuid + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
                 write(clientFD, msg.c_str(), strlen(msg.c_str()));
             }
-            else if (message.receiverFD == itReceiver->getFd()){
-                std::string msg = "EVENT_MESSAGE_LIST \"" + std::string(receiverUuidStr) + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
-                write(clientFD, msg.c_str(), strlen(msg.c_str()));
-            }
-            else continue;
         }
     }
 }
