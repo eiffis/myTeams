@@ -20,4 +20,5 @@ class User {
         int _fd;
         std::string _username;
         bool _loggedIn;
+        std::string _currentContext;
 };

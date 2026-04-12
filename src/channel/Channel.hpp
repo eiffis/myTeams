@@ -12,6 +12,7 @@ private:
     myUuid _uuid;
     std::vector<Thread> _threads;
 public:
+    Channel() = default;
     Channel(std::string channelName, std::string channelDesc);
     ~Channel() = default;
 

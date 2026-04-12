@@ -17,6 +17,7 @@ private:
     myUuid _uuid;
     std::vector<Reply> _replies;
 public:
+    Thread() = default;
     Thread(std::string threadName, std::string threadDesc);
     ~Thread() = default;
 

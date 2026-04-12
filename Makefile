@@ -14,6 +14,9 @@ CXX     =   clang++
 SERVER_SRC		=   src/main.cpp
 SERVER_SRC      +=  src/server/Server.cpp
 SERVER_SRC      +=  src/user/User.cpp
+SERVER_SRC		+= 	src/thread/Thread.cpp
+SERVER_SRC		+=  src/team/Team.cpp
+SERVER_SRC		+=  src/channel/Channel.cpp
 
 ## CLIENT_SRC 
 CLIENT_SRC  =  src/client/clientMain.cpp

@@ -5,6 +5,7 @@ User::User(std::string username, int fd)
     _username = username;
     _fd = fd;
     _loggedIn = true;
+    _currentContext = "";
     uuid_generate(_uuid.uuid);    
 }
 
