@@ -35,6 +35,9 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_MESSAGE_SENT" && arguments.size() == 2){
         client_event_private_message_received(arguments[0].c_str(), arguments[1].c_str());
     }
+    else if (command == "EVENT_MESSAGE_LIST" && arguments.size() == 3){
+        client_private_message_print_messages(arguments[0].c_str(), static_cast<time_t>(std::stoll(arguments[1])), arguments[2].c_str());
+    }
     else
         std::cout << fullMessage << std::endl;
 }

@@ -31,7 +31,7 @@ Server::Server::Server(int port)
     _commandsTab["/users"] = &Server::usersCommand;
     _commandsTab["/user"] = &Server::userCommand;
     _commandsTab["/send"] = &Server::sendCommand;
-    _commandsTab["/message"] = &Server::messageCommand;
+    _commandsTab["/messages"] = &Server::messagesCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
@@ -40,10 +40,37 @@ Server::Server::~Server()
     close(_serverFD);
 }
 
-void Server::Server::messageCommand(int clientFD, const std::vector<std::string> &arguments)
+void Server::Server::messagesCommand(int clientFD, const std::vector<std::string> &arguments)
 {
-    for (auto message : _messages) {
-        std::cout << message.bodyMessage << std::endl;
+    if (arguments.size() != 1){
+        write(clientFD, "INVALID_ARGS.\n", 15);
+        return;
+    }
+    std::string uuid = arguments.front();
+    auto itReceiver = std::find_if(_users.begin(), _users.end(), [&uuid](const User& u) {
+        char uuidStr[37];
+        uuid_unparse(u.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == uuid;
+    });
+    auto itSender = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itReceiver != _users.end() && itSender != _users.end()){
+        char senderUuidStr[37];
+        uuid_unparse(itSender->getUuid().uuid, senderUuidStr);
+        char receiverUuidStr[37];
+        uuid_unparse(itReceiver->getUuid().uuid, receiverUuidStr);
+        for (auto message : _messages) {
+            if (message.senderFD == clientFD){
+                std::string msg = "EVENT_MESSAGE_LIST \"" + std::string(senderUuidStr) + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
+                write(clientFD, msg.c_str(), strlen(msg.c_str()));
+            }
+            else if (message.receiverFD == itReceiver->getFd()){
+                std::string msg = "EVENT_MESSAGE_LIST \"" + std::string(receiverUuidStr) + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
+                write(clientFD, msg.c_str(), strlen(msg.c_str()));
+            }
+            else continue;
+        }
     }
 }
 
