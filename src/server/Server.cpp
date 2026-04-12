@@ -31,12 +31,20 @@ Server::Server::Server(int port)
     _commandsTab["/users"] = &Server::usersCommand;
     _commandsTab["/user"] = &Server::userCommand;
     _commandsTab["/send"] = &Server::sendCommand;
+    _commandsTab["/message"] = &Server::messageCommand;
     //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::messageCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    for (auto message : _messages) {
+        std::cout << message.bodyMessage << std::endl;
+    }
 }
 
 void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &arguments)
@@ -61,12 +69,18 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
     if (itReceiver != _users.end() && itSender != _users.end()) {
         char receiverUiid[37];
         char senderUuid[37];
+        messages_t message;
         uuid_unparse(itSender->getUuid().uuid, senderUuid);
         uuid_unparse(itReceiver->getUuid().uuid, receiverUiid);
         server_event_private_message_sended(senderUuid, receiverUiid, arguments[1].c_str());
         std::string msg = "EVENT_MESSAGE_SENT \"" + std::string(senderUuid) + "\" \"" + arguments[1] + "\"\n";
         write(clientFD, msg.c_str(), strlen(msg.c_str()));
-    } else {
+        message.senderFD = itSender->getFd();
+        message.receiverFD = itReceiver->getFd();
+        message.bodyMessage = arguments[1];
+        time(&message.timestamp);
+        _messages.push_back(message);
+        } else {
         std::string msg = "EVENT_USER_DON'T_EXISTS \"" + uuid + "\"\n";
         write(clientFD, msg.c_str(), msg.length());
         return;

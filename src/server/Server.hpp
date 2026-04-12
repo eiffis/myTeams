@@ -10,6 +10,7 @@
     #include <cstring>
     #include "team/Team.hpp"
     #include <iostream>
+    #include <ctime> 
     #include <poll.h>
     #include <unistd.h>
     #include <stdlib.h>
@@ -21,6 +22,14 @@
     #define NO_TIMEOUT -1
     #define CMD_SIZE 4096
     namespace Server {
+
+        typedef struct messages_s {
+            int senderFD;
+            int receiverFD;
+            time_t timestamp;
+            std::string bodyMessage;
+        }messages_t;
+
         class Server {
             public:
                 Server(int port);
@@ -39,6 +48,7 @@
                 size_t _nbFds;
                 typedef void (Server::*commandHandler)(int clientFD, const std::vector<std::string> &arguments);
                 std::map<std::string, commandHandler> _commandsTab;
+                std::vector<messages_t> _messages;
                 // ensuite faire tous les proto des méthodes des commandes /login /logout etc...
                 void loginCommand(int clientFD, const std::vector<std::string> &arguments);
                 void logoutCommand(int clientFD, const std::vector<std::string> &arguments);
@@ -46,5 +56,6 @@
                 void usersCommand(int clientFD, const std::vector<std::string> &arguments);
                 void userCommand(int clientFD, const std::vector<std::string> &arguments);
                 void sendCommand(int clientFD, const std::vector<std::string> &arguments);
+                void messageCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }
