@@ -63,3 +63,8 @@ void User::setThreadUuid(std::string threadUuid)
 {
     _threadUuid = threadUuid;
 }
+
+Context User::getContext() const
+{
+    return _currentContext;
+}

@@ -19,6 +19,7 @@ class User {
         void setThreadUuid(std::string threadUuid);
         bool isLoggedIn() const;
         void setLogState(bool state);
+        Context getContext() const;
         
     private:
         myUuid _uuid;
