@@ -61,8 +61,8 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
         char receiverUuidStr[37];
         uuid_unparse(itReceiver->getUuid().uuid, receiverUuidStr);
         for (auto message : _messages) {
-            bool me = (message.senderFD == clientFD && message.receiverFD == itReceiver->getFd());
-            bool him = (message.senderFD == itReceiver->getFd() && message.receiverFD == clientFD);
+            bool me = (message.senderUuid == senderUuidStr && message.receiverUuid == receiverUuidStr);
+            bool him = (message.senderUuid == receiverUuidStr && message.receiverUuid == senderUuidStr);
             if (me || him) {
                 std::string actualSenderUuid = me ? senderUuidStr : receiverUuidStr;
                 std::string msg = "EVENT_MESSAGE_LIST \"" + actualSenderUuid + "\" \"" + std::to_string(message.timestamp) + "\" \"" + message.bodyMessage + "\"\n";
@@ -100,8 +100,8 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
         server_event_private_message_sended(senderUuid, receiverUiid, arguments[1].c_str());
         std::string msg = "EVENT_MESSAGE_SENT \"" + std::string(senderUuid) + "\" \"" + arguments[1] + "\"\n";
         write(itReceiver->getFd(), msg.c_str(), strlen(msg.c_str()));
-        message.senderFD = itSender->getFd();
-        message.receiverFD = itReceiver->getFd();
+        message.senderUuid = senderUuid;
+        message.receiverUuid = receiverUiid;
         message.bodyMessage = arguments[1];
         time(&message.timestamp);
         _messages.push_back(message);

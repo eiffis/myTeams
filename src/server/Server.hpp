@@ -24,8 +24,8 @@
     namespace Server {
 
         typedef struct messages_s {
-            int senderFD;
-            int receiverFD;
+            std::string senderUuid;
+            std::string receiverUuid;
             time_t timestamp;
             std::string bodyMessage;
         }messages_t;
