@@ -74,7 +74,7 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
         uuid_unparse(itReceiver->getUuid().uuid, receiverUiid);
         server_event_private_message_sended(senderUuid, receiverUiid, arguments[1].c_str());
         std::string msg = "EVENT_MESSAGE_SENT \"" + std::string(senderUuid) + "\" \"" + arguments[1] + "\"\n";
-        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+        write(itReceiver->getFd(), msg.c_str(), strlen(msg.c_str()));
         message.senderFD = itSender->getFd();
         message.receiverFD = itReceiver->getFd();
         message.bodyMessage = arguments[1];
