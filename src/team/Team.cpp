@@ -1,5 +1,11 @@
 #include "Team.hpp"
 
+Team::Team(std::string teamName, std::string teamDesc)
+{
+    std::strncpy(_name, teamName.c_str(), MAX_NAME_LENGTH);
+    std::strncpy(_message, teamDesc.c_str(), MAX_DESCRIPTION_LENGTH);
+}
+
 bool Team::store(std::ofstream &out)
 {
     if (out.bad())

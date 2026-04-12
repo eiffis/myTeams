@@ -12,8 +12,8 @@ private:
     std::vector<myUuid> _subscribedUsers;
     std::vector<Channel> _channels;
 public:
-    Team(/* args */);
-    ~Team();
+    Team(std::string teamName, std::string teamDesc);
+    ~Team() = default;
 
     char *getName() { return _name; };
     uuid_t &getUuid() { return _uuid.uuid; };

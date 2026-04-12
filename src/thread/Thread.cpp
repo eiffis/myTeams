@@ -1,5 +1,11 @@
 #include "Thread.hpp"
 
+Thread::Thread(std::string threadName, std::string threadDesc)
+{
+    std::strncpy(_name, threadName.c_str(), MAX_NAME_LENGTH);
+    std::strncpy(_messsage, threadDesc.c_str(), MAX_DESCRIPTION_LENGTH);
+}
+
 bool Thread::store(std::ofstream &out)
 {
     if (out.bad())

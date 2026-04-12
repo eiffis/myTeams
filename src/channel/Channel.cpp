@@ -1,5 +1,11 @@
 #include "Channel.hpp"
 
+Channel::Channel(std::string channelName, std::string channelDesc)
+{
+    std::strncpy(_name, channelName.c_str(), MAX_NAME_LENGTH);
+    std::strncpy(_message, channelDesc.c_str(), MAX_DESCRIPTION_LENGTH);
+}
+
 bool Channel::store(std::ofstream &out)
 {
     if (out.bad())

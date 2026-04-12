@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <cstring>
 #include "Constants.hpp"
 #include "Models.hpp"
 #include "Thread.hpp"
@@ -16,8 +17,8 @@ private:
     myUuid _uuid;
     std::vector<Reply> _replies;
 public:
-    Thread(/* args */);
-    ~Thread();
+    Thread(std::string threadName, std::string threadDesc);
+    ~Thread() = default;
 
     char *getName() { return _name; };
     uuid_t &getUuid() { return _uuid.uuid; };

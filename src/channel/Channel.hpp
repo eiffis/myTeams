@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include "Constants.hpp"
 #include "thread/Thread.hpp"
 
@@ -11,8 +12,8 @@ private:
     myUuid _uuid;
     std::vector<Thread> _threads;
 public:
-    Channel(/* args */);
-    ~Channel();
+    Channel(std::string channelName, std::string channelDesc);
+    ~Channel() = default;
 
     char *getName() { return _name; };
     uuid_t &getUuid() { return _uuid.uuid; };
