@@ -96,7 +96,13 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
             itUser->setContext(CHANNEL);
             return;
         } else {
-            std::string msg = "EVENT_UNKNOWN_TEAM_OR_CHANNEL \"" + channelUuid + "\"\n";
+            if (itTeam == _teams.end()) {
+                std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            } else {
+                std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
             return;
         }
     }
