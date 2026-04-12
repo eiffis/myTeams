@@ -16,8 +16,8 @@ public:
     Channel(std::string channelName, std::string channelDesc);
     ~Channel() = default;
 
-    char *getName() { return _name; };
-    uuid_t &getUuid() { return _uuid.uuid; };
+    const char *getName() { return _name; };
+    myUuid getUuid() const{ return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
 };
