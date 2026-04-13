@@ -19,6 +19,7 @@ public:
     ~Channel() = default;
 
     const char *getName() const { return _name; };
+    std::string getParentTeamUuid() { return _parentTeamUuid;};
     myUuid getUuid() const{ return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
