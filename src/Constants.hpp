@@ -8,5 +8,6 @@ enum Context {
     NONE,
     TEAM,
     CHANNEL,
-    THREAD
+    THREAD,
+    COMMENT
 };
