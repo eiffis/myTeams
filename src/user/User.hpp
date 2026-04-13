@@ -17,6 +17,9 @@ class User {
         void setTeamUuid(std::string teamUuid);
         void setChannelUuid(std::string channelUuid);
         void setThreadUuid(std::string threadUuid);
+        std::string getTeamUuid() const;
+        std::string getChannelUuid() const;
+        std::string getThreadUuid() const;
         bool isLoggedIn() const;
         void setLogState(bool state);
         Context getContext() const;

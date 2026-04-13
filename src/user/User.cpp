@@ -68,3 +68,18 @@ Context User::getContext() const
 {
     return _currentContext;
 }
+
+std::string User::getTeamUuid() const
+{
+    return _teamUuid;
+}
+
+std::string User::getChannelUuid() const
+{
+    return _channelUuid;
+}
+
+std::string User::getThreadUuid() const
+{
+    return _threadUuid;
+}
