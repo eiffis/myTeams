@@ -34,7 +34,6 @@ Server::Server::Server(int port)
     _commandsTab["/messages"] = &Server::messagesCommand;
     _commandsTab["/use"] = &Server::useCommand;
     _commandsTab["/create"] = &Server::createCommand;
-    //Fair toute l'initialisation ici (c moche oui)
 }
 
 Server::Server::~Server()

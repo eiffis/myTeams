@@ -50,7 +50,6 @@
                 typedef void (Server::*commandHandler)(int clientFD, const std::vector<std::string> &arguments);
                 std::map<std::string, commandHandler> _commandsTab;
                 std::vector<messages_t> _messages;
-                // ensuite faire tous les proto des méthodes des commandes /login /logout etc...
                 void loginCommand(int clientFD, const std::vector<std::string> &arguments);
                 void logoutCommand(int clientFD, const std::vector<std::string> &arguments);
                 void helpCommand(int clientFD, const std::vector<std::string> &arguments);
