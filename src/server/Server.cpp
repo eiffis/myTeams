@@ -51,6 +51,13 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
+    auto itExistingTeam = std::find_if(_teams.begin(), _teams.end(), [&arguments](const Team& t) {
+            return std::string(t.getName()) == arguments[0];
+    });
+    if (itExistingTeam != _teams.end()) {
+        write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
+        return;
+    }
     if (itUser->getContext() == NONE) {
         if (arguments.size() != 2){
             write(clientFD, "INVALID_ARGS.\n", 14);
