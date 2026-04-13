@@ -26,6 +26,7 @@ public:
 
     const char *getName() const { return _name; };
     myUuid getUuid() const { return _uuid; };
+    std::string getChannelUuid() const { return _channelUuid;};
     time_t getTimestamp() const;
     void addReply(const Reply& reply);
     bool store(std::ofstream &out);
