@@ -85,17 +85,17 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
-    auto itExistingTeam = std::find_if(_teams.begin(), _teams.end(), [&arguments](const Team& t) {
-            return std::string(t.getName()) == arguments[0];
-    });
-    if (itExistingTeam != _teams.end()) {
-        write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
-        return;
-    }
     if (itUser->getContext() == NONE) {
         if (arguments.size() != 2){
             write(clientFD, "INVALID_ARGS.\n", 14);
             return;
+        }
+        auto itExistingTeam = std::find_if(_teams.begin(), _teams.end(), [&arguments](const Team& t) {
+            return std::string(t.getName()) == arguments[0];
+        });
+        if (itExistingTeam != _teams.end()) {
+            write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
+        return;
         }
         Team newTeam(arguments[0], arguments[1]);
         char teamUuidStr[37];
@@ -119,6 +119,25 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
             write(clientFD, "INVALID_ARGS.\n", 14);
             return;
         }
+        std::string teamUuidSt = itUser->getTeamUuid();
+        auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuidSt](const Team& t) {
+            char uuidStr[37];
+            uuid_unparse(t.getUuid().uuid, uuidStr);
+            return std::string(uuidStr) == teamUuidSt;
+        });
+        char creatorUuidStr[37];
+        uuid_unparse(itUser->getUuid().uuid, creatorUuidStr);
+        if (itTeam == _teams.end() || !itTeam->isUserSubscribed(creatorUuidStr)) {
+            write(clientFD, "UNAUTHORIZED\n", 13);
+            return;
+        }
+        auto itExistingChannel = std::find_if(_channels.begin(), _channels.end(), [&arguments, &teamUuidSt](const Channel& c) {
+            return std::string(c.getName()) == arguments[0] && c.getParentTeamUuid() == teamUuidSt;
+        });
+        if (itExistingChannel != _channels.end()) {
+            write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
+            return;
+        }
         Channel newChannel(arguments[0], arguments[1], itUser->getTeamUuid());
         char teamUuidStr[37];
         char channelUuidStr[37];
@@ -131,9 +150,14 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         std::string personalMsg = "PERSONAL_CHANNEL_CREATED \"" + std::string(channelUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
         write(clientFD, personalMsg.c_str(), personalMsg.length());
         std::string everyoneMsg = "EVENT_CHANNEL_CREATED \"" + std::string(channelUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
-        for (const auto& user : _users) {
-            if (user.isLoggedIn() && user.getFd() != -1) {
-                write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+        if (itTeam != _teams.end()) {
+            for (const auto& user : _users) {
+                if (user.isLoggedIn() && user.getFd() != -1 && user.getFd() != clientFD) {
+                    char targetUuidStr[37];
+                    uuid_unparse(user.getUuid().uuid, targetUuidStr);
+                    if (itTeam->isUserSubscribed(targetUuidStr))
+                        write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+                }
             }
         }
         return;
@@ -141,6 +165,26 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
     if (itUser->getContext() == CHANNEL && !itUser->getTeamUuid().empty() && !itUser->getChannelUuid().empty()){
         if (arguments.size() != 2){
             write(clientFD, "INVALID_ARGS.\n", 14);
+            return;
+        }
+        std::string teamUuidSt = itUser->getTeamUuid();
+        auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuidSt](const Team& t) {
+            char uuidStr[37];
+            uuid_unparse(t.getUuid().uuid, uuidStr);
+            return std::string(uuidStr) == teamUuidSt;
+        });
+        char creatorUuidStr[37];
+        uuid_unparse(itUser->getUuid().uuid, creatorUuidStr);
+        if (itTeam == _teams.end() || !itTeam->isUserSubscribed(creatorUuidStr)) {
+            write(clientFD, "UNAUTHORIZED\n", 13);
+            return;
+        }
+        std::string channelUuidSt = itUser->getChannelUuid();
+        auto itExistingThread = std::find_if(_threads.begin(), _threads.end(), [&arguments, &channelUuidSt](const Thread& t) {
+            return std::string(t.getName()) == arguments[0] && std::string(t.getChannelUuid()) == channelUuidSt;
+        });
+        if (itExistingThread != _threads.end()) {
+            write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
             return;
         }
         Thread newThread(arguments[0], arguments[1], itUser->getChannelUuid());
@@ -154,19 +198,37 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         uuid_unparse(newThread.getUuid().uuid, threadUuidStr);
         server_event_thread_created(channelUuidStr, threadUuidStr, userUuidStr, arguments[0].c_str(), arguments[1].c_str());
         _threads.push_back(newThread);
+        std::string teamUuid = itUser->getTeamUuid();
         std::string personalMsg = "PERSONAL_THREAD_CREATED \"" + std::string(threadUuidStr) + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(newThread.getTimestamp()) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
         write(clientFD, personalMsg.c_str(), personalMsg.length());
         std::string everyoneMsg = "EVENT_THREAD_CREATED \"" + std::string(threadUuidStr) + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(newThread.getTimestamp()) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
-        for (const auto& user : _users) {
-            if (user.isLoggedIn() && user.getFd() != -1) {
-                write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+        if (itTeam != _teams.end()) {
+            for (const auto& user : _users) {
+                if (user.isLoggedIn() && user.getFd() != -1 && user.getFd() != clientFD) {
+                    char targetUuidStr[37];
+                    uuid_unparse(user.getUuid().uuid, targetUuidStr);
+                    if (itTeam->isUserSubscribed(targetUuidStr))
+                        write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+                }
             }
         }
         return;
     }
-if (itUser->getContext() == THREAD && !itUser->getTeamUuid().empty() && !itUser->getChannelUuid().empty() && !itUser->getThreadUuid().empty()){
+    if (itUser->getContext() == THREAD && !itUser->getTeamUuid().empty() && !itUser->getChannelUuid().empty() && !itUser->getThreadUuid().empty()){
         if (arguments.size() != 1){
             write(clientFD, "INVALID_ARGS.\n", 14);
+            return;
+        }
+        std::string teamUuidSt = itUser->getTeamUuid();
+        auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuidSt](const Team& t) {
+            char uuidStr[37];
+            uuid_unparse(t.getUuid().uuid, uuidStr);
+            return std::string(uuidStr) == teamUuidSt;
+        });
+        char creatorUuidStr[37];
+        uuid_unparse(itUser->getUuid().uuid, creatorUuidStr);
+        if (itTeam == _teams.end() || !itTeam->isUserSubscribed(creatorUuidStr)) {
+            write(clientFD, "UNAUTHORIZED\n", 13);
             return;
         }
         std::string threadUuid = itUser->getThreadUuid();
@@ -192,9 +254,14 @@ if (itUser->getContext() == THREAD && !itUser->getTeamUuid().empty() && !itUser-
         write(clientFD, personalMsg.c_str(), personalMsg.length());
         std::string teamUuid = itUser->getTeamUuid();
         std::string everyoneMsg = "EVENT_REPLY_RECEIVED \"" + teamUuid + "\" \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + arguments[0] + "\"\n";
-        for (const auto& user : _users) {
-            if (user.isLoggedIn() && user.getFd() != -1 && user.getFd() != clientFD) {
-                write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+        if (itTeam != _teams.end()) {
+            for (const auto& user : _users) {
+                if (user.isLoggedIn() && user.getFd() != -1 && user.getFd() != clientFD) {
+                    char targetUuidStr[37];
+                    uuid_unparse(user.getUuid().uuid, targetUuidStr);
+                    if (itTeam->isUserSubscribed(targetUuidStr))
+                        write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+                }
             }
         }
         return;
