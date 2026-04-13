@@ -410,14 +410,14 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
         char uuidStr[37];
         uuid_unparse(_users.at(index).getUuid().uuid, uuidStr);
         server_event_user_logged_out(uuidStr);
-        it->setLogState(false);
-        it->setFD(-1);
         std::string msg = "EVENT_LOGGED_OUT \"" + std::string(uuidStr) + "\" \"" + it->getUsername() + "\"\n";
         for (const auto& u : _users) {
             if (u.isLoggedIn() && u.getFd() != -1) {
                 write(u.getFd(), msg.c_str(), msg.length());
             }
         }
+        it->setLogState(false);
+        it->setFD(-1);
         return;
     } else {
         std::string msg = "USER NOT FOUND\n";
