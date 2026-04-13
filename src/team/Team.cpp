@@ -4,8 +4,8 @@ Team::Team(std::string teamName, std::string teamDesc)
 {
     std::memset(_name, 0, MAX_NAME_LENGTH);
     std::memset(_message, 0, MAX_DESCRIPTION_LENGTH);
-    std::strncpy(_name, teamName.c_str(), MAX_NAME_LENGTH);
-    std::strncpy(_message, teamDesc.c_str(), MAX_DESCRIPTION_LENGTH);
+    std::strncpy(_name, teamName.c_str(), MAX_NAME_LENGTH - 1);
+    std::strncpy(_message, teamDesc.c_str(), MAX_DESCRIPTION_LENGTH - 1);
     uuid_generate(_uuid.uuid);
 }
 
