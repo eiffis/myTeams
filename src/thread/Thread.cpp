@@ -48,3 +48,8 @@ time_t Thread::getTimestamp() const
 {
     return _timestamp;
 }
+
+void Thread::addReply(const Reply &reply)
+{
+    _replies.push_back(reply);
+}
