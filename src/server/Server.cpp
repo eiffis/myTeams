@@ -34,12 +34,47 @@ Server::Server::Server(int port)
     _commandsTab["/messages"] = &Server::messagesCommand;
     _commandsTab["/use"] = &Server::useCommand;
     _commandsTab["/create"] = &Server::createCommand;
+    _commandsTab["/subscribe"] = &Server::subscribeCommand;
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
 }
+
+void Server::Server::subscribeCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 1){
+        write(clientFD, "INVALID_ARGS.\n", 14);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    std::string teamUuid = arguments[0];
+    auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& t) {
+        char uuidStr[37];
+        uuid_unparse(t.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == teamUuid;
+    });
+    if (itTeam == _teams.end()) {
+        std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    char userUuidStr[37];
+    uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+    if (!itTeam->isUserSubscribed(userUuidStr))
+        itTeam->subscribeUser(itUser->getUuid());
+    server_event_user_subscribed(teamUuid.c_str(), userUuidStr);
+    std::string msg = "PERSONAL_SUBSCRIBED \"" + std::string(userUuidStr) + "\" \"" + teamUuid + "\"\n";
+    write(clientFD, msg.c_str(), msg.length());
+}
+
 
 void Server::Server::createCommand(int clientFD, const std::vector<std::string> &arguments)
 {
