@@ -56,8 +56,7 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_ALREADY_EXIST" && arguments.size() == 0){
         client_error_already_exist();
     }
-    else
-        std::cout << fullMessage << std::endl;
+    else return;
 }
 
 void Client::Client::runClient()
@@ -78,7 +77,6 @@ void Client::Client::runClient()
         throw std::runtime_error("IP adress is invalid.");
     if (connect(clientFD, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
         throw std::runtime_error("Failed to connect to the server");
-    std::cout << "Connected to the myTeams server: " << _adress << ":" << _port << std::endl;
     stdinFD.fd = STDIN_FILENO;
     stdinFD.events = POLLIN;
     stdinFD.revents = 0;
@@ -103,7 +101,6 @@ void Client::Client::runClient()
         if (_fds[1].revents & POLLIN) {
             bytesRead = read(clientFD, buffer, sizeof(buffer) - 1);
             if (bytesRead <= 0){
-                std::cout << "Connexion lost." << std::endl;
                 break;
             }
             buffer[bytesRead] = '\0';
