@@ -79,6 +79,30 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         }
         return;
     }
+    if (itUser->getContext() == TEAM){
+        if (arguments.size() != 2){
+            write(clientFD, "INVALID_ARGS.\n", 14);
+            return;
+        }
+        Channel newChannel(arguments[0], arguments[1], itUser->getTeamUuid());
+        char teamUuidStr[37];
+        char channelUuidStr[37];
+        uuid_t teamUuid;
+        uuid_parse(itUser->getTeamUuid().c_str(), teamUuid);
+        uuid_unparse(teamUuid, teamUuidStr);
+        uuid_unparse(newChannel.getUuid().uuid, channelUuidStr);
+        server_event_channel_created(teamUuidStr, channelUuidStr, arguments[0].c_str());
+        _channels.push_back(newChannel);
+        std::string personalMsg = "PERSONAL_CHANNEL_CREATED \"" + std::string(channelUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
+        write(clientFD, personalMsg.c_str(), personalMsg.length());
+        std::string everyoneMsg = "EVENT_CHANNEL_CREATED \"" + std::string(channelUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
+        for (const auto& user : _users) {
+            if (user.isLoggedIn() && user.getFd() != -1) {
+                write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+            }
+        }
+        return;
+    }
 }
 
 void Server::Server::useCommand(int clientFD, const std::vector<std::string> &arguments)
