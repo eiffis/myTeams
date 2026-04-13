@@ -60,3 +60,20 @@ bool Team::load(std::ifstream &in)
         return false;
     return true;
 }
+
+void Team::subscribeUser(myUuid userUuid)
+{
+    _subscribedUsers.push_back(userUuid);
+}
+
+bool Team::isUserSubscribed(std::string userUuidStr) const
+{
+    for (const auto& u : _subscribedUsers) {
+        char uuidStr[37];
+        uuid_unparse(u.uuid, uuidStr);
+        if (std::string(uuidStr) == userUuidStr) {
+            return true;
+        }
+    }
+    return false;
+}

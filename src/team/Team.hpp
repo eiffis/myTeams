@@ -20,4 +20,6 @@ public:
     myUuid getUuid() const { return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
+    void subscribeUser(myUuid userUuid);
+    bool isUserSubscribed(std::string userUuidStr) const;
 };
