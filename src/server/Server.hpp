@@ -61,5 +61,6 @@
                 void useCommand(int clientFD, const std::vector<std::string> &arguments);
                 void createCommand(int clientFD, const std::vector<std::string> &arguments);
                 void subscribeCommand(int clientFD, const std::vector<std::string> &arguments);
+                void unsubscribeCommand(int clientFD, const std::vector<std::string> &arguments);
         };
     }

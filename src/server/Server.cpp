@@ -35,6 +35,7 @@ Server::Server::Server(int port)
     _commandsTab["/use"] = &Server::useCommand;
     _commandsTab["/create"] = &Server::createCommand;
     _commandsTab["/subscribe"] = &Server::subscribeCommand;
+    _commandsTab["/unsubscribe"] = &Server::unsubscribeCommand;
 }
 
 Server::Server::~Server()
