@@ -77,3 +77,16 @@ bool Team::isUserSubscribed(std::string userUuidStr) const
     }
     return false;
 }
+
+void Team::unsubscribeUser(std::string userUuidStr)
+{
+    auto it = std::find_if(_subscribedUsers.begin(), _subscribedUsers.end(), [&userUuidStr](const myUuid& u) {
+        char uuidStr[37];
+        uuid_unparse(u.uuid, uuidStr);
+        return std::string(uuidStr) == userUuidStr;
+    });
+    
+    if (it != _subscribedUsers.end()) {
+        _subscribedUsers.erase(it);
+    }
+}

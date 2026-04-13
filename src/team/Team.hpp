@@ -2,6 +2,7 @@
 
 #include "Constants.hpp"
 #include "channel/Channel.hpp"
+#include <algorithm>
 
 class Team
 {
@@ -22,4 +23,5 @@ public:
     bool load(std::ifstream &in);
     void subscribeUser(myUuid userUuid);
     bool isUserSubscribed(std::string userUuidStr) const;
+    void unsubscribeUser(std::string userUuidStr);
 };
