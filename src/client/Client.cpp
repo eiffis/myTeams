@@ -65,6 +65,12 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_THREAD_CREATED" && arguments.size() == 5){
         client_event_thread_created(arguments[0].c_str(), arguments[1].c_str(), static_cast<time_t>(std::stoll(arguments[2])), arguments[3].c_str(), arguments[4].c_str());
     }
+    else if (command == "PERSONAL_REPLY_CREATED" && arguments.size() == 4){
+        client_print_reply_created(arguments[0].c_str(), arguments[1].c_str(), static_cast<time_t>(std::stoll(arguments[2])), arguments[3].c_str());
+    }
+    else if (command == "EVENT_REPLY_RECEIVED" && arguments.size() == 4){
+        client_event_thread_reply_received(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str(), arguments[3].c_str());
+    }
     else return;
 }
 

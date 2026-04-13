@@ -11,6 +11,7 @@
     #include "team/Team.hpp"
     #include <iostream>
     #include <ctime> 
+    #include "Models.hpp"
     #include <poll.h>
     #include <unistd.h>
     #include <stdlib.h>
