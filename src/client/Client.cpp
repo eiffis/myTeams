@@ -71,6 +71,9 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_REPLY_RECEIVED" && arguments.size() == 4){
         client_event_thread_reply_received(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str(), arguments[3].c_str());
     }
+    else if (command == "PERSONAL_SUBSCRIBED" && arguments.size() == 2){
+        client_print_subscribed(arguments[0].c_str(), arguments[1].c_str());
+    }
     else return;
 }
 
