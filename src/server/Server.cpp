@@ -79,7 +79,7 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         }
         return;
     }
-    if (itUser->getContext() == TEAM){
+    if (itUser->getContext() == TEAM && !itUser->getTeamUuid().empty()){
         if (arguments.size() != 2){
             write(clientFD, "INVALID_ARGS.\n", 14);
             return;
