@@ -15,6 +15,7 @@ private:
     char _name[MAX_NAME_LENGTH];
     char _message[MAX_DESCRIPTION_LENGTH];
     myUuid _uuid;
+    time_t _timestamp;
     std::vector<Reply> _replies;
     std::string _channelUuid;
 

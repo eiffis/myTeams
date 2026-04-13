@@ -8,6 +8,7 @@ Thread::Thread(std::string threadName, std::string threadDesc, std::string chann
     std::strncpy(_message, threadDesc.c_str(), MAX_DESCRIPTION_LENGTH - 1);
     uuid_generate(_uuid.uuid);
     _channelUuid = channelUuid;
+    _timestamp = time(&_timestamp);
 }
 
 bool Thread::store(std::ofstream &out)
