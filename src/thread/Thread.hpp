@@ -16,9 +16,11 @@ private:
     char _message[MAX_DESCRIPTION_LENGTH];
     myUuid _uuid;
     std::vector<Reply> _replies;
+    std::string _channelUuid;
+
 public:
     Thread() = default;
-    Thread(std::string threadName, std::string threadDesc);
+    Thread(std::string threadName, std::string threadDesc, std::string channelUuid);
     ~Thread() = default;
 
     const char *getName() const { return _name; };

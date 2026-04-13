@@ -1,12 +1,13 @@
 #include "Thread.hpp"
 
-Thread::Thread(std::string threadName, std::string threadDesc)
+Thread::Thread(std::string threadName, std::string threadDesc, std::string channelUuid)
 {
     std::memset(_name, 0, MAX_NAME_LENGTH);
     std::memset(_message, 0, MAX_DESCRIPTION_LENGTH);
     std::strncpy(_name, threadName.c_str(), MAX_NAME_LENGTH - 1);
     std::strncpy(_message, threadDesc.c_str(), MAX_DESCRIPTION_LENGTH - 1);
     uuid_generate(_uuid.uuid);
+    _channelUuid = channelUuid;
 }
 
 bool Thread::store(std::ofstream &out)
