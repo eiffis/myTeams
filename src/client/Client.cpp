@@ -53,6 +53,12 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "EVENT_ALREADY_EXIST" && arguments.size() == 0){
         client_error_already_exist();
     }
+    else if (command == "PERSONAL_CHANNEL_CREATED" && arguments.size() == 3){
+        client_print_channel_created(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
+    }
+    else if (command == "EVENT_CHANNEL_CREATED" && arguments.size() == 3){
+        client_event_channel_created(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
+    }
     else return;
 }
 
