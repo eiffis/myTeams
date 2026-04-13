@@ -70,8 +70,14 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         uuid_unparse(newTeam.getUuid().uuid, teamUuidStr);
         server_event_team_created(teamUuidStr, arguments[0].c_str(), userUuidStr);
         _teams.push_back(newTeam);
-        std::string msg = "EVENT_TEAM_CREATED \"" + std::string(teamUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
-        write(clientFD, msg.c_str(), strlen(msg.c_str()));
+        std::string personalMsg = "PERSONAL_TEAM_CREATED \"" + std::string(teamUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
+        write(clientFD, personalMsg.c_str(), personalMsg.length());
+        std::string everyoneMsg = "EVENT_TEAM_CREATED \"" + std::string(teamUuidStr) + "\" \"" + arguments[0] + "\" \"" + arguments[1] + "\"\n";
+        for (const auto& user : _users) {
+            if (user.isLoggedIn() && user.getFd() != -1) {
+                write(user.getFd(), everyoneMsg.c_str(), everyoneMsg.length());
+            }
+        }
         return;
     }
 }
