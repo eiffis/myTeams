@@ -654,6 +654,12 @@ void Server::Server::runServer()
                         char uuidItStr[37];
                         uuid_unparse(it->getUuid().uuid, uuidItStr);
                         server_event_user_logged_out(uuidItStr);
+                        std::string msg = "EVENT_LOGGED_OUT \"" + std::string(uuidItStr) + "\" \"" + it->getUsername() + "\"\n";
+                        for (const auto& u : _users) {
+                            if (u.isLoggedIn() && u.getFd() != -1 && u.getFd() != fd) {
+                                write(u.getFd(), msg.c_str(), msg.length());
+                            }
+                        }
                         it->setFD(-1);
                         it->setLogState(false);
                     }
