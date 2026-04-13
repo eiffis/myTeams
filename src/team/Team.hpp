@@ -11,7 +11,6 @@ private:
     char _message[MAX_DESCRIPTION_LENGTH];
     myUuid _uuid;
     std::vector<myUuid> _subscribedUsers;
-    std::vector<Channel> _channels;
 public:
     Team() = default;
     Team(std::string teamName, std::string teamDesc);

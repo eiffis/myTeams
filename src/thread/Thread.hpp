@@ -17,7 +17,7 @@ private:
     myUuid _uuid;
     time_t _timestamp;
     std::vector<Reply> _replies;
-    std::string _channelUuid;
+    char _channelUuid[37];
 
 public:
     Thread() = default;
@@ -26,7 +26,7 @@ public:
 
     const char *getName() const { return _name; };
     myUuid getUuid() const { return _uuid; };
-    std::string getChannelUuid() const { return _channelUuid;};
+    const char *getChannelUuid() const { return _channelUuid;};
     time_t getTimestamp() const;
     void addReply(const Reply& reply);
     bool store(std::ofstream &out);

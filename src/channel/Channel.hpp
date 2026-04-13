@@ -10,8 +10,7 @@ private:
     char _name[MAX_NAME_LENGTH];
     char _message[MAX_DESCRIPTION_LENGTH];
     myUuid _uuid;
-    std::vector<Thread> _threads;
-    std::string _parentTeamUuid;
+    char _parentTeamUuid[37];
 
 public:
     Channel() = default;
@@ -19,7 +18,7 @@ public:
     ~Channel() = default;
 
     const char *getName() const { return _name; };
-    std::string getParentTeamUuid() const { return _parentTeamUuid;};
+    const char *getParentTeamUuid() const { return _parentTeamUuid;};
     myUuid getUuid() const{ return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
