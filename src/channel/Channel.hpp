@@ -15,7 +15,7 @@ private:
 
 public:
     Channel() = default;
-    Channel(std::string channelName, std::string channelDesc);
+    Channel(std::string channelName, std::string channelDesc, std::string _parentNameUuid);
     ~Channel() = default;
 
     const char *getName() const { return _name; };
