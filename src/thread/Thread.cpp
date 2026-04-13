@@ -43,3 +43,8 @@ bool Thread::load(std::ifstream &in)
         return false;
     return true;
 }
+
+time_t Thread::getTimestamp() const
+{
+    return _timestamp;
+}

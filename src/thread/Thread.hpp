@@ -26,6 +26,7 @@ public:
 
     const char *getName() const { return _name; };
     myUuid getUuid() const { return _uuid; };
+    time_t getTimestamp() const;
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
 };
