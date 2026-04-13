@@ -354,9 +354,12 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
     char uuidStr[37];
     uuid_unparse(userUuid.uuid, uuidStr);
     server_event_user_created(uuidStr, newUser.getUsername().c_str());
+    server_event_user_logged_in(uuidStr);
     _users.push_back(newUser);
     std::string msg = "EVENT_USER_CREATED \"" + std::string(uuidStr) + "\" \"" + username + "\"\n";
     write(clientFD, msg.c_str(), strlen(msg.c_str()));
+    std::string msg2 = "EVENT_LOGGED_IN \"" + std::string(uuidStr) + "\" \"" + username + "\"\n";
+    write(clientFD, msg2.c_str(), msg2.length());
     return;
 }
 
