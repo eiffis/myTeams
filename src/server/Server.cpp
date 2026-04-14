@@ -133,6 +133,7 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         return;
         }
         Team newTeam(arguments[0], arguments[1]);
+        newTeam.subscribeUser(itUser->getUuid());
         char teamUuidStr[37];
         char userUuidStr[37];
         uuid_unparse(itUser->getUuid().uuid, userUuidStr);
@@ -229,7 +230,7 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         uuid_t channelUuid;
         uuid_parse(itUser->getChannelUuid().c_str(), channelUuid);
         uuid_unparse(channelUuid, channelUuidStr);
-        uuid_unparse(itUser->getUuid().uuid, channelUuidStr);
+        uuid_unparse(itUser->getUuid().uuid, userUuidStr);
         uuid_unparse(newThread.getUuid().uuid, threadUuidStr);
         server_event_thread_created(channelUuidStr, threadUuidStr, userUuidStr, arguments[0].c_str(), arguments[1].c_str());
         _threads.push_back(newThread);
