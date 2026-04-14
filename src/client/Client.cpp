@@ -77,6 +77,18 @@ void Client::Client::handleEvent(std::string fullMessage, Parser &parser)
     else if (command == "PERSONAL_UNSUBSCRIBED" && arguments.size() == 2){
         client_print_unsubscribed(arguments[0].c_str(), arguments[1].c_str());
     }
+    else if (command == "EVENT_TEAM_LIST" && arguments.size() == 3){
+        client_print_teams(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
+    }
+    else if (command == "EVENT_CHANNEL_LIST" && arguments.size() == 3){
+        client_team_print_channels(arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
+    }
+    else if (command == "EVENT_THREAD_LIST" && arguments.size() == 5){
+        client_channel_print_threads(arguments[0].c_str(), arguments[1].c_str(), static_cast<time_t>(std::stoll(arguments[2])), arguments[3].c_str(), arguments[4].c_str());
+    }
+    else if (command == "EVENT_REPLY_LIST" && arguments.size() == 4){
+        client_thread_print_replies(arguments[0].c_str(), arguments[1].c_str(), static_cast<time_t>(std::stoll(arguments[2])), arguments[3].c_str());
+    }
     else return;
 }
 
