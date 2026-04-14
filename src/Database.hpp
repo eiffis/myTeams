@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <fstream>
+#include <map>
+#include "Models.hpp"
 
 template <typename T>
 bool storeVector(std::ofstream &out, std::vector<T> &vec)
@@ -32,3 +34,6 @@ bool loadVector(std::ifstream &in, std::vector<T> &vec)
         return false;
     return true;
 }
+
+bool storePrivateMessages(std::ofstream &out, std::map<std::string, std::vector<Reply>> &pms);
+bool loadPrivateMessages(std::ifstream &in, std::map<std::string, std::vector<Reply>> &pms);
