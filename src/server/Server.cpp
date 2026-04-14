@@ -36,11 +36,79 @@ Server::Server::Server(int port)
     _commandsTab["/create"] = &Server::createCommand;
     _commandsTab["/subscribe"] = &Server::subscribeCommand;
     _commandsTab["/unsubscribe"] = &Server::unsubscribeCommand;
+    _commandsTab["/list"] = &Server::listCommand;
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+
+void Server::Server::listCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 0) {
+        write(clientFD, "INVALID_ARGS.\n", 14);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    if (itUser->getContext() == NONE) {
+        for (const auto& team : _teams) {
+            char uuidStr[37];
+            uuid_unparse(team.getUuid().uuid, uuidStr);
+            std::string msg = "EVENT_TEAM_LIST \"" + std::string(uuidStr) + "\" \"" + team.getName() + "\" \"" + team.getDescription() + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+        }
+        return;
+    }
+    if (itUser->getContext() == TEAM && !itUser->getTeamUuid().empty()) {
+        std::string teamUuidSt = itUser->getTeamUuid();
+        for (const auto& channel : _channels) {
+            if (std::string(channel.getParentTeamUuid()) == teamUuidSt) {
+                char uuidStr[37];
+                uuid_unparse(channel.getUuid().uuid, uuidStr);
+                std::string msg = "EVENT_CHANNEL_LIST \"" + std::string(uuidStr) + "\" \"" + channel.getName() + "\" \"" + channel.getDescription() + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
+        }
+        return;
+    }
+    if (itUser->getContext() == CHANNEL && !itUser->getTeamUuid().empty() && !itUser->getChannelUuid().empty()) {
+        std::string channelUuidSt = itUser->getChannelUuid();
+        for (const auto& thread : _threads) {
+            if (std::string(thread.getChannelUuid()) == channelUuidSt) {
+                char uuidStr[37];
+                uuid_unparse(thread.getUuid().uuid, uuidStr);
+                std::string msg = "EVENT_THREAD_LIST \"" + std::string(uuidStr) + "\" \"" + thread.getUserUuid() + "\" \"" + std::to_string(thread.getTimestamp()) + "\" \"" + thread.getName() + "\" \"" + thread.getMessage() + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
+        }
+        return;
+    }
+    if (itUser->getContext() == THREAD && !itUser->getTeamUuid().empty() && !itUser->getChannelUuid().empty() && !itUser->getThreadUuid().empty()) {
+        std::string threadUuidSt = itUser->getThreadUuid();
+        
+        auto itThread = std::find_if(_threads.begin(), _threads.end(), [&threadUuidSt](const Thread& t) {
+            char uuidStr[37];
+            uuid_unparse(t.getUuid().uuid, uuidStr);
+            return std::string(uuidStr) == threadUuidSt;
+        });
+
+        if (itThread != _threads.end()) {
+            for (const auto& reply : itThread->getReplies()) {
+                char userUuidStr[37];
+                uuid_unparse(reply.user, userUuidStr);
+                std::string msg = "EVENT_REPLY_LIST \"" + threadUuidSt + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(reply.timestamp) + "\" \"" + reply.body + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
+        }
+        return;
+    }
 }
 
 void Server::Server::unsubscribeCommand(int clientFD, const std::vector<std::string> &arguments)
