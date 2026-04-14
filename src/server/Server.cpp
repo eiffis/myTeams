@@ -569,6 +569,23 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
+    auto currentUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (currentUser != _users.end() && currentUser->isLoggedIn()) {
+        char uuidCurrentStr[37];
+        uuid_unparse(currentUser->getUuid().uuid, uuidCurrentStr);
+        server_event_user_logged_out(uuidCurrentStr);
+        std::string msgOut = "EVENT_LOGGED_OUT \"" + std::string(uuidCurrentStr) + "\" \"" + currentUser->getUsername() + "\"\n";
+        for (const auto& u : _users) {
+            if (u.isLoggedIn() && u.getFd() != -1) {
+                write(u.getFd(), msgOut.c_str(), msgOut.length());
+            }
+        }
+        currentUser->setLogState(false);
+        currentUser->setFD(-1);
+        currentUser->setContext(NONE);
+    }
     std::string username = arguments.front();
     auto it = std::find_if(_users.begin(), _users.end(), [&username](const User& u) {
         return u.getUsername() == username;
