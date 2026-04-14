@@ -37,11 +37,86 @@ Server::Server::Server(int port)
     _commandsTab["/subscribe"] = &Server::subscribeCommand;
     _commandsTab["/unsubscribe"] = &Server::unsubscribeCommand;
     _commandsTab["/list"] = &Server::listCommand;
+    _commandsTab["/info"] = &Server::infoCommand;
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
+}
+void Server::Server::infoCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() != 0) {
+        write(clientFD, "INVALID_ARGS.\n", 14);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    char userUuidStr[37];
+    uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+    if (itUser->getContext() == NONE) {
+        std::string msg = "PERSONAL_INFO_USER \"" + std::string(userUuidStr) + "\" \"" + itUser->getUsername() + "\" \"1\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    std::string teamUuid = itUser->getTeamUuid();
+    auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& t) {
+        char uuidStr[37];
+        uuid_unparse(t.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == teamUuid;
+    });
+    if (itTeam == _teams.end()) {
+        std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    if (!itTeam->isUserSubscribed(userUuidStr)) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    if (itUser->getContext() == TEAM) {
+        std::string msg = "PERSONAL_INFO_TEAM \"" + teamUuid + "\" \"" + itTeam->getName() + "\" \"" + itTeam->getDescription() + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    std::string channelUuid = itUser->getChannelUuid();
+    auto itChannel = std::find_if(_channels.begin(), _channels.end(), [&channelUuid](const Channel& c) {
+        char uuidStr[37];
+        uuid_unparse(c.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == channelUuid;
+    });
+    if (itChannel == _channels.end()) {
+        std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    if (itUser->getContext() == CHANNEL) {
+        std::string msg = "PERSONAL_INFO_CHANNEL \"" + channelUuid + "\" \"" + itChannel->getName() + "\" \"" + itChannel->getDescription() + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    std::string threadUuid = itUser->getThreadUuid();
+    auto itThread = std::find_if(_threads.begin(), _threads.end(), [&threadUuid](const Thread& t) {
+        char uuidStr[37];
+        uuid_unparse(t.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == threadUuid;
+    });
+    if (itThread == _threads.end()) {
+        std::string msg = "EVENT_UNKNOWN_THREAD \"" + threadUuid + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+    if (itUser->getContext() == THREAD) {
+        std::string msg = "PERSONAL_INFO_THREAD \"" + threadUuid + "\" \"" + std::string(itThread->getUserUuid()) + "\" \"" + std::to_string(itThread->getTimestamp()) + "\" \"" + itThread->getName() + "\" \"" + itThread->getMessage() + "\"\n";
+        write(clientFD, msg.c_str(), msg.length());
+        return;
+    }
+
 }
 
 void Server::Server::listCommand(int clientFD, const std::vector<std::string> &arguments)
@@ -64,6 +139,18 @@ void Server::Server::listCommand(int clientFD, const std::vector<std::string> &a
             std::string msg = "EVENT_TEAM_LIST \"" + std::string(uuidStr) + "\" \"" + team.getName() + "\" \"" + team.getDescription() + "\"\n";
             write(clientFD, msg.c_str(), msg.length());
         }
+        return;
+    }
+    std::string teamUuidSt = itUser->getTeamUuid();
+    auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuidSt](const Team& t) {
+        char uuidStr[37];
+        uuid_unparse(t.getUuid().uuid, uuidStr);
+        return std::string(uuidStr) == teamUuidSt;
+    });
+    char userUuidStr[37];
+    uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+    if (itTeam == _teams.end() || !itTeam->isUserSubscribed(userUuidStr)) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
     if (itUser->getContext() == TEAM && !itUser->getTeamUuid().empty()) {
