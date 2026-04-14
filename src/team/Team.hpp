@@ -14,6 +14,7 @@ private:
 public:
     Team() = default;
     Team(std::string teamName, std::string teamDesc);
+    const char *getDescription() const { return _message; };
     ~Team() = default;
 
     const char *getName() const { return _name; };

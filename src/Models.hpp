@@ -12,4 +12,5 @@ struct Reply
 {
     uuid_t user;
     char body[MAX_BODY_LENGTH];
+    time_t timestamp;
 };

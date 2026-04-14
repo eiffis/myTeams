@@ -19,6 +19,7 @@ public:
 
     const char *getName() const { return _name; };
     const char *getParentTeamUuid() const { return _parentTeamUuid;};
+    const char *getDescription() const { return _message; };
     myUuid getUuid() const{ return _uuid; };
     bool store(std::ofstream &out);
     bool load(std::ifstream &in);
