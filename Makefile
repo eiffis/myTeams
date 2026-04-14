@@ -30,7 +30,7 @@ CLIENT_OBJ  = $(CLIENT_SRC:.cpp=.o) $(COMMON_SRC:.cpp=.o)
 
 CXXFLAGS  =   -I./src/ -I./libs/myteams -Wall -Wextra
 
-LDFLAGS   = -L./libs/myteams -lmyteams -Wl,-rpath=./libs/myteams -luuid
+LDFLAGS   = -L./libs/myteams -lmyteams -luuid
 
 all:    $(SERVER) $(CLIENT)
 
