@@ -643,8 +643,10 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
     auto currentUser = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
         return u.getFd() == clientFD;
     } );
-    if (currentUser == _users.end())
+    if (currentUser == _users.end()){
+        write(clientFD, "UNAUTHORIZED\n", 13);
         return;
+    }
     if (arguments.size() != 1) {
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
@@ -673,8 +675,10 @@ void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &
     auto it = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
         return u.getFd() == clientFD;
     } );
-    if (it == _users.end())
+    if (it == _users.end()){
         return;
+        write(clientFD, "UNAUTHORIZED\n", 13);
+    }
     if (arguments.size() > 0){
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
