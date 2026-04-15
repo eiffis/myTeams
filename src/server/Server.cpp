@@ -5,6 +5,7 @@ Server::Server::Server(int port)
     int opt = 1;
     struct pollfd serverFd;
 
+    load();
     _serverFD = socket(AF_INET, SOCK_STREAM, 0);
     if (_serverFD == -1)
         throw std::runtime_error("Error on socket");
@@ -587,6 +588,7 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
         char receiverUuidStr[37];
         uuid_unparse(itReceiver->getUuid().uuid, receiverUuidStr);
         for (auto message : _messages) {
+            std::cout << "message " << message.bodyMessage << std::endl;
             bool me = (message.senderUuid == senderUuidStr && message.receiverUuid == receiverUuidStr);
             bool him = (message.senderUuid == receiverUuidStr && message.receiverUuid == senderUuidStr);
             if (me || him) {
@@ -813,7 +815,6 @@ void Server::Server::runServer()
     Parser parser;
     struct sockaddr_in clientAddress;
     socklen_t clientLen;
-    
 
     while (1) {
         if (poll(_fds.data(), _fds.size(), NO_TIMEOUT) == -1)
@@ -875,5 +876,113 @@ void Server::Server::runServer()
             }
         }
     }
+    save();
     return;
+}
+
+void Server::Server::save()
+{
+    std::ofstream out(SAVE_FILE, std::ios_base::binary | std::ios_base::trunc);
+
+    if (out.bad())
+        throw std::runtime_error("Couldn't open file for writing.");
+    size_t nbusers = _users.size();
+    out.write(reinterpret_cast<const char *>(&nbusers), sizeof(size_t));
+    for (auto &u : _users) {
+        size_t unamelength = u.getUsername().size();
+        out.write(reinterpret_cast<const char *>(&unamelength), sizeof(size_t));
+        out.write(u.getUsername().data(), unamelength);
+        myUuid uuid = u.getUuid();
+        out.write(reinterpret_cast<const char *>(&uuid), sizeof(myUuid));
+    }
+    size_t nbteams = _teams.size();
+    out.write(reinterpret_cast<const char *>(&nbteams), sizeof(size_t));
+    for (auto &t : _teams)
+        t.store(out);
+    size_t nbchannels = _channels.size();
+    out.write(reinterpret_cast<const char *>(&nbchannels), sizeof(size_t));
+    for (auto &c : _channels)
+        c.store(out);
+    size_t nbthreads = _threads.size();
+    out.write(reinterpret_cast<const char *>(&nbthreads), sizeof(size_t));
+    for (auto &t : _threads)
+        t.store(out);
+    size_t nbpms = _messages.size();
+    out.write(reinterpret_cast<const char *>(&nbpms), sizeof(size_t));
+    for (auto &m : _messages) {
+        out.write(m.senderUuid.data(), UNPARSED_UUUID);
+        out.write(m.receiverUuid.data(), UNPARSED_UUUID);
+        out.write(reinterpret_cast<const char *>(&m.timestamp), sizeof(time_t));
+        size_t blenght = m.bodyMessage.length();
+        out.write(reinterpret_cast<const char *>(&blenght), sizeof(size_t));
+        out.write(m.bodyMessage.data(), blenght);
+    }
+    if (out.fail())
+        throw std::runtime_error("Couldn't save current server data.");
+    out.close();
+}
+
+void Server::Server::load()
+{
+    std::ifstream in(SAVE_FILE, std::ios_base::binary);
+
+    if (!in.is_open())
+        return;
+    if (in.bad())
+        throw std::runtime_error("Couldn't open file for writing.");
+    size_t nbusers = 0;
+    in.read(reinterpret_cast<char *>(&nbusers), sizeof(size_t));
+    if (nbusers) {
+        for (size_t i = 0; i < nbusers; i++) {
+            size_t unamelength = 0;
+            std::string name;
+            myUuid uuid;
+            in.read(reinterpret_cast<char *>(&unamelength), sizeof(size_t));
+            name.resize(unamelength);
+            in.read(name.data(), unamelength);
+            in.read(reinterpret_cast<char *>(&uuid), sizeof(myUuid));
+            _users.emplace_back(name, -1);
+            _users.at(_users.size() - 1).setUuid(uuid);
+        }
+    }
+    size_t nbteams = 0;
+    in.read(reinterpret_cast<char *>(&nbteams), sizeof(size_t));
+    if (nbteams) {
+        _teams.resize(nbteams);
+        for (auto &t : _teams)
+            t.load(in);
+    }
+    size_t nbchannels = 0;
+    in.read(reinterpret_cast<char *>(&nbchannels), sizeof(size_t));
+    if (nbchannels) {
+        _channels.resize(nbchannels);
+        for (auto &c : _channels)
+            c.load(in);
+    }
+    size_t nbthreads = 0;
+    in.read(reinterpret_cast<char *>(&nbthreads), sizeof(size_t));
+    if (nbthreads) {
+        _threads.resize(nbthreads);
+        for (auto &t : _threads)
+            t.load(in);
+    }
+    size_t nbpms = 0;
+    in.read(reinterpret_cast<char *>(&nbpms), sizeof(size_t));
+    if (nbpms) {
+        _messages.resize(nbteams);
+        for (auto &m : _messages) {
+            m.senderUuid.resize(UNPARSED_UUUID);
+            in.read(m.senderUuid.data(), UNPARSED_UUUID);
+            m.receiverUuid.resize(UNPARSED_UUUID);
+            in.read(m.receiverUuid.data(), UNPARSED_UUUID);
+            in.read(reinterpret_cast<char *>(&m.timestamp), sizeof(time_t));
+            size_t blenght = 0;
+            in.read(reinterpret_cast<char *>(&blenght), sizeof(size_t));
+            m.bodyMessage.resize(blenght);
+            in.read(m.bodyMessage.data(), blenght);
+        }
+    }
+    if (in.fail())
+        throw std::runtime_error("Couldn't save current server data.");
+    in.close();
 }

@@ -36,6 +36,7 @@
                 ~Server();
                 void handleCommand(Parser &parser, int clientFD);
                 void runServer();
+
             private:
                 int _serverFD;
                 int _port;
@@ -64,5 +65,8 @@
                 void unsubscribeCommand(int clientFD, const std::vector<std::string> &arguments);
                 void listCommand(int clientFD, const std::vector<std::string> &arguments);
                 void infoCommand(int clientFD, const std::vector<std::string> &arguments);
+
+                void save();
+                void load();
         };
     }
