@@ -634,6 +634,13 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
     }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
     std::string uuid = arguments.front();
     auto itReceiver = std::find_if(_users.begin(), _users.end(), [&uuid](const User& u) {
         char uuidStr[37];
@@ -664,6 +671,13 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
 {
     if (arguments.size() != 2){
         write(clientFD, "INVALID_ARGS.\n", 14);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
     if (arguments[1].length() > MAX_BODY_LENGTH){
@@ -710,10 +724,10 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
 
 void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
 {
-    auto currentUser = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
-    } );
-    if (currentUser == _users.end()){
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
         write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
@@ -742,10 +756,10 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
 
 void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
 {
-    auto it = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
-    } );
-    if (it == _users.end()){
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
         write(clientFD, "UNAUTHORIZED\n", 13);
         return;
     }
