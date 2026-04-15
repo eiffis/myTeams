@@ -20,7 +20,7 @@ bool Thread::store(std::ofstream &out)
         return false;
     out.write(_name, MAX_NAME_LENGTH);
     out.write(_message, MAX_DESCRIPTION_LENGTH);
-    out.write(_channelUuid, UNPARSED_UUUID);
+    out.write(_channelUuid, 37);
     out.write(_userUuid, 37);
     out.write(reinterpret_cast<const char *>(&_uuid), sizeof(myUuid));
     out.write(reinterpret_cast<const char *>(&_timestamp), sizeof(time_t));
@@ -36,7 +36,7 @@ bool Thread::load(std::ifstream &in)
         return false;
     in.read(_name, MAX_NAME_LENGTH);
     in.read(_message, MAX_DESCRIPTION_LENGTH);
-    in.read(_channelUuid, UNPARSED_UUUID);
+    in.read(_channelUuid, 37);
     in.read(_userUuid, 37);
     in.read(reinterpret_cast<char *>(&_uuid), sizeof(myUuid));
     in.read(reinterpret_cast<char *>(&_timestamp), sizeof(time_t));
