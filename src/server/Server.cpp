@@ -490,17 +490,15 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == teamUuid;
         });
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid("");
+        itUser->setThreadUuid("");
+        itUser->setContext(TEAM);
         if (itTeam != _teams.end()){
-            itUser->setTeamUuid(teamUuid);
-            itUser->setChannelUuid("");
-            itUser->setThreadUuid("");
-            itUser->setContext(TEAM);
-            return;
-        } else {
             std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
             write(clientFD, msg.c_str(), msg.length());
-            return;
         }
+        return;
     }
     if (arguments.size() == 2){
         std::string teamUuid = arguments[0];
@@ -515,22 +513,18 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == channelUuid;
         });
-        if (itTeam != _teams.end() && itChannel != _channels.end()){
-            itUser->setTeamUuid(teamUuid);
-            itUser->setChannelUuid(channelUuid);
-            itUser->setThreadUuid("");
-            itUser->setContext(CHANNEL);
-            return;
-        } else {
-            if (itTeam == _teams.end()) {
-                std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
-                write(clientFD, msg.c_str(), msg.length());
-            } else {
-                std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
-                write(clientFD, msg.c_str(), msg.length());
-            }
-            return;
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid(channelUuid);
+        itUser->setThreadUuid("");
+        itUser->setContext(CHANNEL);
+        if (itTeam == _teams.end()) {
+            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+        } else if (itChannel == _channels.end()){
+            std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
         }
+        return;
     }
     if (arguments.size() == 3){
         std::string teamUuid = arguments[0];
@@ -551,27 +545,22 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == threadUuid;
         });
-        if (itTeam != _teams.end() && itChannel != _channels.end() && itThread != _threads.end()){
-            itUser->setTeamUuid(teamUuid);
-            itUser->setChannelUuid(channelUuid);
-            itUser->setThreadUuid(threadUuid);
-            itUser->setContext(THREAD);
-            return;
-        } else {
-            if (itTeam == _teams.end()) {
-                std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
-                write(clientFD, msg.c_str(), msg.length());
-            } else if (itChannel == _channels.end()) {
-                std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
-                write(clientFD, msg.c_str(), msg.length());
-            } else {
-                std::string msg = "EVENT_UNKNOWN_THREAD \"" + threadUuid + "\"\n";
-                write(clientFD, msg.c_str(), msg.length());
-            }
-            return;
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid(channelUuid);
+        itUser->setThreadUuid(threadUuid);
+        itUser->setContext(THREAD);
+        if (itTeam == _teams.end()) {
+            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+        } else if (itChannel == _channels.end()) {
+            std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+        } else if (itThread == _threads.end()){
+            std::string msg = "EVENT_UNKNOWN_THREAD \"" + threadUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
         }
+        return;
     }
-
 }
 
 void Server::Server::messagesCommand(int clientFD, const std::vector<std::string> &arguments)
@@ -625,6 +614,10 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
     auto itSender = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
     });
+    if (itSender == _users.end() || !itSender->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
     if (itReceiver != _users.end() && itSender != _users.end()) {
         char receiverUiid[37];
         char senderUuid[37];
@@ -954,7 +947,12 @@ void Server::Server::load()
             in.read(name.data(), unamelength);
             in.read(reinterpret_cast<char *>(&uuid), sizeof(myUuid));
             _users.emplace_back(name, -1);
+            _users.back().setUuid(uuid);
+            _users.back().setLogState(false);
             _users.at(_users.size() - 1).setUuid(uuid);
+            char uuidStr[37];
+            uuid_unparse(uuid.uuid, uuidStr);
+            server_event_user_loaded(uuidStr, name.c_str());
         }
     }
     size_t nbteams = 0;
