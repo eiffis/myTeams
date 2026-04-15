@@ -21,7 +21,7 @@ private:
 
 public:
     Thread() = default;
-    Thread(std::string threadName, std::string threadDesc, std::string channelUuid);
+    Thread(std::string threadName, std::string threadDesc, std::string channelUuid, std::string userUuid);
     ~Thread() = default;
 
     const char *getName() const { return _name; };

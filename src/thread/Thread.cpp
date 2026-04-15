@@ -1,13 +1,15 @@
 #include "Thread.hpp"
 
-Thread::Thread(std::string threadName, std::string threadDesc, std::string channelUuid)
+Thread::Thread(std::string threadName, std::string threadDesc, std::string channelUuid, std::string userUuid)
 {
     std::memset(_name, 0, MAX_NAME_LENGTH);
     std::memset(_message, 0, MAX_DESCRIPTION_LENGTH);
     std::memset(_channelUuid, 0, 37);
+    std::memset(_userUuid, 0, 37);
     std::strncpy(_name, threadName.c_str(), MAX_NAME_LENGTH - 1);
     std::strncpy(_message, threadDesc.c_str(), MAX_DESCRIPTION_LENGTH - 1);
     std::strncpy(_channelUuid, channelUuid.c_str(), 36);
+    std::strncpy(_userUuid, userUuid.c_str(), 36);
     uuid_generate(_uuid.uuid);
     _timestamp = time(&_timestamp);
 }
@@ -19,6 +21,7 @@ bool Thread::store(std::ofstream &out)
     out.write(_name, MAX_NAME_LENGTH);
     out.write(_message, MAX_DESCRIPTION_LENGTH);
     out.write(_channelUuid, UNPARSED_UUUID);
+    out.write(_userUuid, 37);
     out.write(reinterpret_cast<const char *>(&_uuid), sizeof(myUuid));
     out.write(reinterpret_cast<const char *>(&_timestamp), sizeof(time_t));
     size_t replylen = _replies.size();
@@ -34,6 +37,7 @@ bool Thread::load(std::ifstream &in)
     in.read(_name, MAX_NAME_LENGTH);
     in.read(_message, MAX_DESCRIPTION_LENGTH);
     in.read(_channelUuid, UNPARSED_UUUID);
+    in.read(_userUuid, 37);
     in.read(reinterpret_cast<char *>(&_uuid), sizeof(myUuid));
     in.read(reinterpret_cast<char *>(&_timestamp), sizeof(time_t));
     size_t replylen = 0;
