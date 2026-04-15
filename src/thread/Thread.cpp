@@ -18,13 +18,13 @@ bool Thread::store(std::ofstream &out)
         return false;
     out.write(_name, MAX_NAME_LENGTH);
     out.write(_message, MAX_DESCRIPTION_LENGTH);
+    out.write(_channelUuid, UNPARSED_UUUID);
     out.write(reinterpret_cast<const char *>(&_uuid), sizeof(myUuid));
+    out.write(reinterpret_cast<const char *>(&_timestamp), sizeof(time_t));
     size_t replylen = _replies.size();
     out.write(reinterpret_cast<const char *>(&replylen), sizeof(size_t));
     out.write(reinterpret_cast<const char *>(_replies.data()), replylen * sizeof(Reply));
-    if (out.fail())
-        return false;
-    return true;
+    return !out.fail();
 }
 
 bool Thread::load(std::ifstream &in)
@@ -33,16 +33,16 @@ bool Thread::load(std::ifstream &in)
         return false;
     in.read(_name, MAX_NAME_LENGTH);
     in.read(_message, MAX_DESCRIPTION_LENGTH);
+    in.read(_channelUuid, UNPARSED_UUUID);
     in.read(reinterpret_cast<char *>(&_uuid), sizeof(myUuid));
+    in.read(reinterpret_cast<char *>(&_timestamp), sizeof(time_t));
     size_t replylen = 0;
     in.read(reinterpret_cast<char *>(&replylen), sizeof(size_t));
     if (replylen) {
         _replies.resize(replylen);
         in.read(reinterpret_cast<char *>(_replies.data()), replylen * sizeof(Reply));
     }
-    if (in.fail())
-        return false;
-    return true;
+    return !in.fail();
 }
 
 time_t Thread::getTimestamp() const

@@ -7,7 +7,6 @@
 #include <cstring>
 #include "Constants.hpp"
 #include "Models.hpp"
-#include "Thread.hpp"
 
 class Thread
 {
