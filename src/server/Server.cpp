@@ -46,12 +46,14 @@ Server::Server::Server(int port)
     _commandsTab["/unsubscribe"] = &Server::unsubscribeCommand;
     _commandsTab["/list"] = &Server::listCommand;
     _commandsTab["/info"] = &Server::infoCommand;
+    _commandsTab["/subscribed"] = &Server::subscribedCommand;
 }
 
 Server::Server::~Server()
 {
     close(_serverFD);
 }
+
 void Server::Server::infoCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 0) {
