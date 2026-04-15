@@ -632,6 +632,10 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
         time(&message.timestamp);
         _messages.push_back(message);
         } else {
+            if (itSender == _users.end()){
+                write(clientFD, "UNAUTHORIZED\n", 13);
+                return;
+            }
         std::string msg = "EVENT_USER_DON'T_EXISTS \"" + uuid + "\"\n";
         write(clientFD, msg.c_str(), msg.length());
         return;
@@ -676,8 +680,8 @@ void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &
         return u.getFd() == clientFD;
     } );
     if (it == _users.end()){
-        return;
         write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
     }
     if (arguments.size() > 0){
         write(clientFD, "INVALID_ARGS.\n", 14);
