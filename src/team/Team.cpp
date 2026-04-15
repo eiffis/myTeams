@@ -19,9 +19,7 @@ bool Team::store(std::ofstream &out)
     size_t userlen = _subscribedUsers.size();
     out.write(reinterpret_cast<const char *>(&userlen), sizeof(size_t));
     out.write(reinterpret_cast<const char *>(_subscribedUsers.data()), userlen * sizeof(myUuid));
-    if (out.fail())
-        return false;
-    return true;
+    return !out.fail();
 }
 
 bool Team::load(std::ifstream &in)
@@ -38,9 +36,7 @@ bool Team::load(std::ifstream &in)
         _subscribedUsers.resize(userlen);
         in.read(reinterpret_cast<char *>(_subscribedUsers.data()), userlen * sizeof(myUuid));
     }
-    if (in.fail())
-        return false;
-    return true;
+    return !in.fail();
 }
 
 void Team::subscribeUser(myUuid userUuid)
@@ -67,7 +63,7 @@ void Team::unsubscribeUser(std::string userUuidStr)
         uuid_unparse(u.uuid, uuidStr);
         return std::string(uuidStr) == userUuidStr;
     });
-    
+
     if (it != _subscribedUsers.end()) {
         _subscribedUsers.erase(it);
     }
