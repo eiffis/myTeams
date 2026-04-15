@@ -36,7 +36,7 @@ myUuid User::getUuid() const
 
 void User::setUuid(myUuid uuid)
 {
-    std::strncpy(reinterpret_cast<char *>(&_uuid.uuid), reinterpret_cast<char *>(&uuid.uuid), sizeof(uuid.uuid));
+    uuid_copy(_uuid.uuid, uuid.uuid);
 }
 
 bool User::isLoggedIn() const
