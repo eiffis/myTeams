@@ -501,10 +501,10 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         uuid_copy(newReply.user, itUser->getUuid().uuid);
         std::memset(newReply.body, 0, MAX_BODY_LENGTH);
         std::strncpy(newReply.body, arguments[0].c_str(), MAX_BODY_LENGTH - 1);
+        newReply.timestamp = time(NULL);
         itThread->addReply(newReply); 
         char userUuidStr[37];
         uuid_unparse(itUser->getUuid().uuid, userUuidStr);
-        newReply.timestamp = time(NULL);
         server_event_reply_created(threadUuid.c_str(), userUuidStr, newReply.body);
         std::string personalMsg = "PERSONAL_REPLY_CREATED \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(newReply.timestamp) + "\" \"" + arguments[0] + "\"\n";
         write(clientFD, personalMsg.c_str(), personalMsg.length());
@@ -542,16 +542,16 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
     }
     if (arguments.size() == 1){
         std::string teamUuid = arguments[0];
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid("");
+        itUser->setThreadUuid("");
+        itUser->setContext(TEAM);
         auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == teamUuid;
         });
-        itUser->setTeamUuid(teamUuid);
-        itUser->setChannelUuid("");
-        itUser->setThreadUuid("");
-        itUser->setContext(TEAM);
-        if (itTeam != _teams.end()){
+        if (itTeam == _teams.end()){
             std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
             write(clientFD, msg.c_str(), msg.length());
         }
@@ -560,26 +560,29 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
     if (arguments.size() == 2){
         std::string teamUuid = arguments[0];
         std::string channelUuid = arguments[1];
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid(channelUuid);
+        itUser->setThreadUuid("");
+        itUser->setContext(CHANNEL);
         auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == teamUuid;
         });
+        if (itTeam == _teams.end()) {
+            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+            return;
+        }
         auto itChannel = std::find_if(_channels.begin(), _channels.end(), [&channelUuid](const Channel& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == channelUuid;
         });
-        itUser->setTeamUuid(teamUuid);
-        itUser->setChannelUuid(channelUuid);
-        itUser->setThreadUuid("");
-        itUser->setContext(CHANNEL);
-        if (itTeam == _teams.end()) {
-            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
-            write(clientFD, msg.c_str(), msg.length());
-        } else if (itChannel == _channels.end()){
+        if (itChannel == _channels.end()){
             std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
             write(clientFD, msg.c_str(), msg.length());
+            return;
         }
         return;
     }
@@ -587,34 +590,39 @@ void Server::Server::useCommand(int clientFD, const std::vector<std::string> &ar
         std::string teamUuid = arguments[0];
         std::string channelUuid = arguments[1];
         std::string threadUuid = arguments[2];
+        itUser->setTeamUuid(teamUuid);
+        itUser->setChannelUuid(channelUuid);
+        itUser->setThreadUuid(threadUuid);
+        itUser->setContext(THREAD);
         auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == teamUuid;
         });
+        if (itTeam == _teams.end()) {
+            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+            return;
+        }
         auto itChannel = std::find_if(_channels.begin(), _channels.end(), [&channelUuid](const Channel& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == channelUuid;
         });
+        if (itChannel == _channels.end()) {
+            std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+            return;
+        }
         auto itThread = std::find_if(_threads.begin(), _threads.end(), [&threadUuid](const Thread& u) {
             char uuidStr[37];
             uuid_unparse(u.getUuid().uuid, uuidStr);
             return std::string(uuidStr) == threadUuid;
         });
-        itUser->setTeamUuid(teamUuid);
-        itUser->setChannelUuid(channelUuid);
-        itUser->setThreadUuid(threadUuid);
-        itUser->setContext(THREAD);
-        if (itTeam == _teams.end()) {
-            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
-            write(clientFD, msg.c_str(), msg.length());
-        } else if (itChannel == _channels.end()) {
-            std::string msg = "EVENT_UNKNOWN_CHANNEL \"" + channelUuid + "\"\n";
-            write(clientFD, msg.c_str(), msg.length());
-        } else if (itThread == _threads.end()){
+        if (itThread == _threads.end()){
             std::string msg = "EVENT_UNKNOWN_THREAD \"" + threadUuid + "\"\n";
             write(clientFD, msg.c_str(), msg.length());
+            return;
         }
         return;
     }
