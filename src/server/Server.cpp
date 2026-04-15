@@ -937,7 +937,7 @@ void Server::Server::load()
     if (!in.is_open())
         return;
     if (in.bad())
-        throw std::runtime_error("Couldn't open file for writing.");
+        throw std::runtime_error("Couldn't open file for reading.");
     size_t nbusers = 0;
     in.read(reinterpret_cast<char *>(&nbusers), sizeof(size_t));
     if (nbusers) {
@@ -991,6 +991,6 @@ void Server::Server::load()
         }
     }
     if (in.fail())
-        throw std::runtime_error("Couldn't save current server data.");
+        throw std::runtime_error("Couldn't load server data.");
     in.close();
 }
