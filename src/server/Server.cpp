@@ -54,6 +54,61 @@ Server::Server::~Server()
     close(_serverFD);
 }
 
+void Server::Server::subscribedCommand(int clientFD, const std::vector<std::string> &arguments)
+{
+    if (arguments.size() > 1) {
+        write(clientFD, "INVALID_ARGS.\n", 14);
+        return;
+    }
+    auto itUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
+        return u.getFd() == clientFD;
+    });
+    if (itUser == _users.end() || !itUser->isLoggedIn()) {
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
+    }
+    char userUuidStr[37];
+    uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+    if (arguments.size() == 0) {
+        for (const auto &team : _teams) {
+            if (team.isUserSubscribed(userUuidStr)) {
+                char teamUuidStr[37];
+                uuid_unparse(team.getUuid().uuid, teamUuidStr);
+                std::string msg = "EVENT_TEAM_LIST \"" + std::string(teamUuidStr) + "\" \"" + team.getName() + "\" \"" + team.getDescription() + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
+        }
+        return;
+    }
+    if (arguments.size() == 1) {
+        std::string teamUuid = arguments[0];
+        auto itTeam = std::find_if(_teams.begin(), _teams.end(), [&teamUuid](const Team& t) {
+            char uuidStr[37];
+            uuid_unparse(t.getUuid().uuid, uuidStr);
+            return std::string(uuidStr) == teamUuid;
+        });
+        if (itTeam == _teams.end()) {
+            std::string msg = "EVENT_UNKNOWN_TEAM \"" + teamUuid + "\"\n";
+            write(clientFD, msg.c_str(), msg.length());
+            return;
+        }
+        if (!itTeam->isUserSubscribed(userUuidStr)) {
+            write(clientFD, "UNAUTHORIZED\n", 13);
+            return;
+        }
+        for (const auto &u : _users) {
+            char targetUserUuidStr[37];
+            uuid_unparse(u.getUuid().uuid, targetUserUuidStr);
+            if (itTeam->isUserSubscribed(targetUserUuidStr)) {
+                std::string status = u.isLoggedIn() ? "1" : "0";
+                std::string msg = "EVENT_USERS \"" + std::string(targetUserUuidStr) + "\" \"" + u.getUsername() + "\" \"" + status + "\"\n";
+                write(clientFD, msg.c_str(), msg.length());
+            }
+        }
+        return;
+    }
+}
+
 void Server::Server::infoCommand(int clientFD, const std::vector<std::string> &arguments)
 {
     if (arguments.size() != 0) {
