@@ -17,6 +17,7 @@
     #include <stdlib.h>
     #include <vector>
     #include <map>
+    #include <csignal>
     extern "C" {
         #include "../libs/myteams/logging_server.h"
     }

@@ -1,5 +1,12 @@
 #include "server/Server.hpp"
 
+bool runLoop = true;
+
+void signalHandler(__attribute__((unused)) int signal)
+{
+    runLoop = false;
+}
+
 Server::Server::Server(int port)
 {
     int opt = 1;
@@ -588,7 +595,6 @@ void Server::Server::messagesCommand(int clientFD, const std::vector<std::string
         char receiverUuidStr[37];
         uuid_unparse(itReceiver->getUuid().uuid, receiverUuidStr);
         for (auto message : _messages) {
-            std::cout << "message " << message.bodyMessage << std::endl;
             bool me = (message.senderUuid == senderUuidStr && message.receiverUuid == receiverUuidStr);
             bool him = (message.senderUuid == receiverUuidStr && message.receiverUuid == senderUuidStr);
             if (me || him) {
@@ -816,7 +822,8 @@ void Server::Server::runServer()
     struct sockaddr_in clientAddress;
     socklen_t clientLen;
 
-    while (1) {
+    std::signal(SIGINT, signalHandler);
+    while (runLoop) {
         if (poll(_fds.data(), _fds.size(), NO_TIMEOUT) == -1)
             break;
         for (int i = 0; i < (int)_fds.size(); i++) {
@@ -876,6 +883,7 @@ void Server::Server::runServer()
             }
         }
     }
+    std::signal(SIGINT, SIG_DFL);
     save();
     return;
 }
