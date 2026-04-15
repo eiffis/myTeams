@@ -386,14 +386,14 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
             write(clientFD, "EVENT_ALREADY_EXIST\n", 20);
             return;
         }
-        Thread newThread(arguments[0], arguments[1], itUser->getChannelUuid());
-        char threadUuidStr[37];
-        char channelUuidStr[37];
         char userUuidStr[37];
+        uuid_unparse(itUser->getUuid().uuid, userUuidStr);
+        Thread newThread(arguments[0], arguments[1], itUser->getChannelUuid(), userUuidStr);
+        char channelUuidStr[37];
+        char threadUuidStr[37];
         uuid_t channelUuid;
         uuid_parse(itUser->getChannelUuid().c_str(), channelUuid);
         uuid_unparse(channelUuid, channelUuidStr);
-        uuid_unparse(itUser->getUuid().uuid, userUuidStr);
         uuid_unparse(newThread.getUuid().uuid, threadUuidStr);
         server_event_thread_created(channelUuidStr, threadUuidStr, userUuidStr, arguments[0].c_str(), arguments[1].c_str());
         _threads.push_back(newThread);
@@ -447,9 +447,9 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         itThread->addReply(newReply); 
         char userUuidStr[37];
         uuid_unparse(itUser->getUuid().uuid, userUuidStr);
-        time_t timestamp = time(&timestamp);
+        newReply.timestamp = time(NULL);
         server_event_reply_created(threadUuid.c_str(), userUuidStr, newReply.body);
-        std::string personalMsg = "PERSONAL_REPLY_CREATED \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(timestamp) + "\" \"" + arguments[0] + "\"\n";
+        std::string personalMsg = "PERSONAL_REPLY_CREATED \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + std::to_string(newReply.timestamp) + "\" \"" + arguments[0] + "\"\n";
         write(clientFD, personalMsg.c_str(), personalMsg.length());
         std::string teamUuid = itUser->getTeamUuid();
         std::string everyoneMsg = "EVENT_REPLY_RECEIVED \"" + teamUuid + "\" \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + arguments[0] + "\"\n";
@@ -753,19 +753,23 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
     auto currentUser = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
     });
+    //if (currentUser != _users.end() && currentUser->isLoggedIn()) {
+    //    char uuidCurrentStr[37];
+    //    uuid_unparse(currentUser->getUuid().uuid, uuidCurrentStr);
+    //    server_event_user_logged_out(uuidCurrentStr);
+    //    std::string msgOut = "EVENT_LOGGED_OUT \"" + std::string(uuidCurrentStr) + "\" \"" + currentUser->getUsername() + "\"\n";
+    //    for (const auto& u : _users) {
+    //        if (u.isLoggedIn() && u.getFd() != -1) {
+    //            write(u.getFd(), msgOut.c_str(), msgOut.length());
+    //        }
+    //    }
+    //    currentUser->setLogState(false);
+    //    currentUser->setFD(-1);
+    //    currentUser->setContext(NONE);
+    //}
     if (currentUser != _users.end() && currentUser->isLoggedIn()) {
-        char uuidCurrentStr[37];
-        uuid_unparse(currentUser->getUuid().uuid, uuidCurrentStr);
-        server_event_user_logged_out(uuidCurrentStr);
-        std::string msgOut = "EVENT_LOGGED_OUT \"" + std::string(uuidCurrentStr) + "\" \"" + currentUser->getUsername() + "\"\n";
-        for (const auto& u : _users) {
-            if (u.isLoggedIn() && u.getFd() != -1) {
-                write(u.getFd(), msgOut.c_str(), msgOut.length());
-            }
-        }
-        currentUser->setLogState(false);
-        currentUser->setFD(-1);
-        currentUser->setContext(NONE);
+        write(clientFD, "UNAUTHORIZED\n", 13);
+        return;
     }
     std::string username = arguments.front();
     auto it = std::find_if(_users.begin(), _users.end(), [&username](const User& u) {
@@ -977,7 +981,7 @@ void Server::Server::load()
     size_t nbpms = 0;
     in.read(reinterpret_cast<char *>(&nbpms), sizeof(size_t));
     if (nbpms) {
-        _messages.resize(nbteams);
+        _messages.resize(nbpms);
         for (auto &m : _messages) {
             m.senderUuid.resize(UNPARSED_UUUID);
             in.read(m.senderUuid.data(), UNPARSED_UUUID);
