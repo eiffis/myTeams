@@ -1,5 +1,6 @@
 #pragma once 
 #include <string>
+#include <cstring>
 #include <uuid/uuid.h>
 #include "Models.hpp"
 #include "Constants.hpp"
@@ -10,8 +11,10 @@ class User {
         User(std::string username, int fd);
         ~User();
         std::string getUsername() const;
+        void setUsername(std::string username);
         int getFd() const;
         myUuid getUuid() const;
+        void setUuid(myUuid uuid);
         void setFD(int FD);
         void setContext(Context context);
         void setTeamUuid(std::string teamUuid);
@@ -23,7 +26,7 @@ class User {
         bool isLoggedIn() const;
         void setLogState(bool state);
         Context getContext() const;
-        
+
     private:
         myUuid _uuid;
         int _fd;

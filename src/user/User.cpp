@@ -24,9 +24,19 @@ std::string User::getUsername() const
     return _username;
 }
 
+void User::setUsername(std::string username)
+{
+    _username = username;
+}
+
 myUuid User::getUuid() const
 {
     return _uuid;
+}
+
+void User::setUuid(myUuid uuid)
+{
+    std::strncpy(reinterpret_cast<char *>(&_uuid.uuid), reinterpret_cast<char *>(&uuid.uuid), sizeof(uuid.uuid));
 }
 
 bool User::isLoggedIn() const
