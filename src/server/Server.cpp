@@ -640,6 +640,11 @@ void Server::Server::sendCommand(int clientFD, const std::vector<std::string> &a
 
 void Server::Server::userCommand(int clientFD, const std::vector<std::string> &arguments)
 {
+    auto currentUser = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
+        return u.getFd() == clientFD;
+    } );
+    if (currentUser == _users.end())
+        return;
     if (arguments.size() != 1) {
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
@@ -665,6 +670,11 @@ void Server::Server::userCommand(int clientFD, const std::vector<std::string> &a
 
 void Server::Server::usersCommand(int clientFD, const std::vector<std::string> &arguments)
 {
+    auto it = std::find_if(_users.begin(), _users.end(), [clientFD](const User& u){
+        return u.getFd() == clientFD;
+    } );
+    if (it == _users.end())
+        return;
     if (arguments.size() > 0){
         write(clientFD, "INVALID_ARGS.\n", 14);
         return;
