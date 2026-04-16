@@ -831,15 +831,6 @@ void Server::Server::loginCommand(int clientFD, const std::vector<std::string> &
         return u.getFd() == clientFD;
     });
     if (currentUser != _users.end() && currentUser->isLoggedIn()) {
-        char uuidCurrentStr[37];
-        uuid_unparse(currentUser->getUuid().uuid, uuidCurrentStr);
-        server_event_user_logged_out(uuidCurrentStr);
-        std::string msgOut = "EVENT_LOGGED_OUT \"" + std::string(uuidCurrentStr) + "\" \"" + currentUser->getUsername() + "\"\n";
-        for (const auto& u : _users) {
-            if (u.isLoggedIn() && u.getFd() != -1) {
-                write(u.getFd(), msgOut.c_str(), msgOut.length());
-            }
-        }
         currentUser->setLogState(false);
         currentUser->setFD(-1);
         currentUser->setContext(NONE);
