@@ -796,6 +796,10 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
     auto it = std::find_if(_users.begin(), _users.end(), [&clientFD](const User& u) {
         return u.getFd() == clientFD;
     });
+    auto itFD = std::find_if(_fds.begin(), _fds.end(), [&clientFD](const struct pollfd& u) {
+        return u.fd == clientFD;
+    });
+    size_t indexFd = std::distance(_fds.begin(), itFD);
     size_t index = std::distance(_users.begin(), it);
     if (it != _users.end()) {
         char uuidStr[37];
@@ -809,7 +813,7 @@ void Server::Server::logoutCommand(int clientFD, const std::vector<std::string> 
         }
         it->setLogState(false);
         it->setFD(-1);
-        
+        close(_fds.at(indexFd).fd);
         return;
     } else {
         std::string msg = "USER NOT FOUND\n";
