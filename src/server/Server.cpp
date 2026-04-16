@@ -512,7 +512,7 @@ void Server::Server::createCommand(int clientFD, const std::vector<std::string> 
         std::string everyoneMsg = "EVENT_REPLY_RECEIVED \"" + teamUuid + "\" \"" + threadUuid + "\" \"" + std::string(userUuidStr) + "\" \"" + arguments[0] + "\"\n";
         if (itTeam != _teams.end()) {
             for (const auto& user : _users) {
-                if (user.isLoggedIn() && user.getFd() != -1 && user.getFd() != clientFD) {
+                if (user.isLoggedIn() && user.getFd() != -1) {
                     char targetUuidStr[37];
                     uuid_unparse(user.getUuid().uuid, targetUuidStr);
                     if (itTeam->isUserSubscribed(targetUuidStr))
